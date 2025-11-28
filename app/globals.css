@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Base color system - Light Mode */
+    --background: 0 0% 100%;
+    --foreground: 20 14.3% 4.1%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 20 14.3% 4.1%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14.3% 4.1%;
+
+    --primary: 41 40% 60%;  /* Gold/Bronze theme inspired by WoW */
+    --primary-foreground: 20 14.3% 4.1%;
+
+    --secondary: 24 9.8% 10%;
+    --secondary-foreground: 60 9.1% 97.8%;
+
+    --muted: 60 4.8% 95.9%;
+    --muted-foreground: 25 5.3% 44.7%;
+
+    --accent: 41 40% 60%;
+    --accent-foreground: 20 14.3% 4.1%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.1% 97.8%;
+
+    --border: 20 5.9% 90%;
+    --input: 20 5.9% 90%;
+    --ring: 41 40% 60%;
+
+    --radius: 0.75rem;
+
+    /* WoW Class Colors */
+    --class-druid: 28 100% 51%;        /* #FF7C0A */
+    --class-hunter: 83 52% 65%;        /* #AAD372 */
+    --class-mage: 194 87% 58%;         /* #3FC7EB */
+    --class-paladin: 334 85% 76%;      /* #F48CBA */
+    --class-priest: 0 0% 100%;         /* #FFFFFF */
+    --class-rogue: 57 100% 69%;        /* #FFF468 */
+    --class-shaman: 209 100% 44%;      /* #0070DD */
+    --class-warlock: 241 69% 73%;      /* #8788EE */
+    --class-warrior: 30 37% 60%;       /* #C69B6D */
+
+    /* WoW Role Colors */
+    --role-tank: 195 48% 38%;          /* #337B8F */
+    --role-dps: 0 55% 42%;             /* #A73030 */
+    --role-healer: 122 45% 44%;        /* #3F9E40 */
+
+    /* Semantic Colors */
+    --success: 122 39% 49%;
+    --warning: 38 92% 50%;
+    --error: 0 65% 51%;
+    --info: 199 89% 48%;
+
+    /* Attunement Colors */
+    --attunement-mc: 20 100% 50%;      /* #FF6600 */
+    --attunement-onyxia: 270 62% 55%;  /* #A335EE */
+    --attunement-bwl: 352 56% 45%;     /* #C41F3B */
+    --attunement-uldum: 51 100% 50%;   /* #FFD700 */
+    --attunement-naxx: 165 100% 50%;   /* #00FFBA */
+  }
+
+  .dark {
+    /* Base color system - Dark Mode */
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+
+    --card: 20 14.3% 4.1%;
+    --card-foreground: 60 9.1% 97.8%;
+
+    --popover: 20 14.3% 4.1%;
+    --popover-foreground: 60 9.1% 97.8%;
+
+    --primary: 41 40% 60%;  /* Gold/Bronze theme */
+    --primary-foreground: 20 14.3% 4.1%;
+
+    --secondary: 12 6.5% 15.1%;
+    --secondary-foreground: 60 9.1% 97.8%;
+
+    --muted: 12 6.5% 15.1%;
+    --muted-foreground: 24 5.4% 63.9%;
+
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 60 9.1% 97.8%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 60 9.1% 97.8%;
+
+    --border: 12 6.5% 15.1%;
+    --input: 12 6.5% 15.1%;
+    --ring: 41 40% 60%;
+
+    /* WoW Class Colors remain the same in dark mode */
+    /* WoW Role Colors remain the same in dark mode */
+    /* Semantic Colors remain the same in dark mode */
+    /* Attunement Colors remain the same in dark mode */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    /* Background texture from seios-aner - subtle grunge texture */
+    /* Note: Original image is 17MB. Consider optimizing/resizing for production */
+    background-image: url('/textures/background.jpg');
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: overlay;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: hsl(var(--background) / 0.92);
+    z-index: -1;
+    pointer-events: none;
+  }
+}
+
+/* Custom utility classes for WoW-specific styling */
+@layer utilities {
+  .class-druid {
+    color: hsl(var(--class-druid));
+  }
+  .class-hunter {
+    color: hsl(var(--class-hunter));
+  }
+  .class-mage {
+    color: hsl(var(--class-mage));
+  }
+  .class-paladin {
+    color: hsl(var(--class-paladin));
+  }
+  .class-priest {
+    color: hsl(var(--class-priest));
+  }
+  .class-rogue {
+    color: hsl(var(--class-rogue));
+  }
+  .class-shaman {
+    color: hsl(var(--class-shaman));
+  }
+  .class-warlock {
+    color: hsl(var(--class-warlock));
+  }
+  .class-warrior {
+    color: hsl(var(--class-warrior));
+  }
+
+  .role-tank {
+    color: hsl(var(--role-tank));
+  }
+  .role-dps {
+    color: hsl(var(--role-dps));
+  }
+  .role-healer {
+    color: hsl(var(--role-healer));
+  }
+
+  .bg-class-druid {
+    background-color: hsl(var(--class-druid));
+  }
+  .bg-class-hunter {
+    background-color: hsl(var(--class-hunter));
+  }
+  .bg-class-mage {
+    background-color: hsl(var(--class-mage));
+  }
+  .bg-class-paladin {
+    background-color: hsl(var(--class-paladin));
+  }
+  .bg-class-priest {
+    background-color: hsl(var(--class-priest));
+  }
+  .bg-class-rogue {
+    background-color: hsl(var(--class-rogue));
+  }
+  .bg-class-shaman {
+    background-color: hsl(var(--class-shaman));
+  }
+  .bg-class-warlock {
+    background-color: hsl(var(--class-warlock));
+  }
+  .bg-class-warrior {
+    background-color: hsl(var(--class-warrior));
+  }
+
+  .bg-role-tank {
+    background-color: hsl(var(--role-tank));
+  }
+  .bg-role-dps {
+    background-color: hsl(var(--role-dps));
+  }
+  .bg-role-healer {
+    background-color: hsl(var(--role-healer));
+  }
+}
