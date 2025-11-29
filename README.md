@@ -12,70 +12,91 @@ A fully customizable guild management system for World of Warcraft guilds, built
 - **Type-Safe**: Complete TypeScript coverage for better DX
 - **Responsive Design**: Mobile-first design that works on all devices
 
-## Getting Started
+## 🚀 Quick Start - No Coding Required!
 
-### Prerequisites
+**Get your guild website running in under 10 minutes:**
 
-- Node.js 20+ or later
-- pnpm (recommended) or npm
-- Firebase account (free tier is sufficient)
+### For Guild Leaders (Non-Technical)
 
-### Quick Setup
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/danljungstrom/GuildManager)
 
-1. **Clone and Install**
+**3 Simple Steps:**
+
+1. **Create Firebase Project** (5 min)
+   - Visit [Firebase Console](https://console.firebase.google.com/)
+   - Create account if not registered
+   - Click **"Create a project"** → Enter name → Disable Analytics → Create
+   - Enable Firestore: **Build** → **Firestore Database** → **Create database** → Standard → Choose region → Production mode → Enable
+   - Create Web App: **Project Overview** (⚙️) → **Add app** → **Web** (`</>`) → Register app (nickname: "*Guildname*", no hosting)
+   - **Copy the entire code block** that appears (looks like this):
+   
+   ```javascript
+   // Import the functions you need from the SDKs you need
+   import { initializeApp } from "firebase/app";
+   import { getAnalytics } from "firebase/analytics";
+   // TODO: Add SDKs for Firebase products that you want to use
+   // https://firebase.google.com/docs/web/setup#available-libraries
+
+   // Your web app's Firebase configuration
+   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+   const firebaseConfig = {
+     apiKey: "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+     authDomain: "my-guild-abc123.firebaseapp.com",
+     projectId: "my-guild-abc123",
+     storageBucket: "my-guild-abc123.appspot.com",
+     messagingSenderId: "123456789012",
+     appId: "1:123456789012:web:abcdef123456",
+     measurementId: "G-XXXXXXXXXX"
+   };
+   
+   // Initialize Firebase
+   const app = initializeApp(firebaseConfig);
+   const analytics = getAnalytics(app);
+   ```
+   
+   > 💡 **Tip**: Copy the whole thing - we'll extract the values automatically!
+
+2. **Deploy to Vercel** (3 min)
+   - Click the Deploy button above
+   - Sign in or create and account
+   - **Paste your entire Firebase config** when Vercel asks
+   - (We'll parse it automatically - no need to enter values separately!)
+   - Wait for deployment (~2 minutes)
+
+3. **Setup Your Guild**
+   - Visit your new site
+   - Complete the setup wizard
+   - Customize in Admin Settings
+
+**📚 Detailed Guide:** [docs/QUICKSTART.md](docs/QUICKSTART.md)
+
+**💰 Cost:** $0/month (free tiers)
+
+---
+
+### For Developers
+
+**Local Development:**
+
 ```bash
-git clone <your-repo-url>
+# Clone and install
+git clone https://github.com/danljungstrom/GuildManager.git
 cd GuildManager
 pnpm install
-```
 
-2. **Firebase Setup**
-   - Go to [Firebase Console](https://console.firebase.google.com/)
-   - Create a new project (or use existing)
-   - Enable Firestore Database
-   - Go to Project Settings > General
-   - Create a Web app and copy the config values
-
-3. **Environment Variables**
-```bash
-# Copy the example env file
+# Setup environment
 cp .env.example .env.local
+# Add your Firebase config to .env.local
 
-# Edit .env.local and add your Firebase credentials
-```
-
-4. **Start Development**
-```bash
+# Run dev server
 pnpm dev
 ```
 
-5. **Initial Setup**
-   - Open [http://localhost:3000](http://localhost:3000)
-   - The setup wizard will automatically appear
-   - Enter your guild name
-   - Choose a theme preset (6 options available)
-   - Click "Complete Setup"
-   - Done! Your guild management site is ready
-   - Configure additional details (server, region, faction) later in Admin Settings
+Open [http://localhost:3000](http://localhost:3000) - The setup wizard will appear.
 
-### Deployment
-
-**Deploy to Vercel:**
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/GuildManager)
-
-1. Click the Deploy button above
-2. Add your Firebase environment variables when prompted
-3. Deploy!
-4. Visit your site and complete the setup wizard
-
-### Build for Production
-
+**Build for production:**
 ```bash
-# Create production build
 pnpm build
-
-# Start production server
 pnpm start
 ```
 
