@@ -39,7 +39,9 @@ export interface ThemeColors {
 export interface ThemeConfig {
   colors: ThemeColors;
   darkMode?: boolean;
-  logo?: string;
+  logo?: string; // URL to custom logo image OR theme icon ID
+  logoType?: 'theme-icon' | 'custom-image';
+  logoFrame?: boolean; // Apply border frame if logo lacks transparency
   favicon?: string;
   customCSS?: string;
   borderRadius?: string;
@@ -47,13 +49,15 @@ export interface ThemeConfig {
 
 /**
  * Guild metadata and settings
+ * Required fields are only those needed for initial setup (name)
+ * Other fields can be configured later in admin settings
  */
 export interface GuildMetadata {
   name: string;
-  server: string;
-  region: WoWRegion;
-  faction: WoWFaction;
-  expansion: WoWExpansion;
+  server?: string;
+  region?: WoWRegion;
+  faction?: WoWFaction;
+  expansion?: WoWExpansion;
   description?: string;
   website?: string;
   discordInvite?: string;

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
+import { GuildProvider } from '@/lib/contexts/GuildContext';
 
 const geist = Geist({
   subsets: ['latin'],
@@ -26,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={cn('min-h-screen bg-background antialiased', geist.variable, geistMono.variable)}>
-        {children}
+        <GuildProvider>
+          {children}
+        </GuildProvider>
       </body>
     </html>
   );

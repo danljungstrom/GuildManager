@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is an admin
+    // TODO: Implement admin role checking once Firebase Authentication is set up
+    // This will require setting custom claims on user tokens
+    function isAdmin() {
+      return request.auth != null; // Temporarily allow any authenticated user
+      // Later change to: request.auth.token.admin == true
+    }
+
+    // Guild configuration - public read, authenticated write
+    // IMPORTANT: In production, restrict writes to admins only
+    match /config/{document=**} {
+      allow read: if true; // Public read access for guild info
+      allow write: if isAuthenticated(); // Require authentication for writes
+      // TODO: Change to `if isAdmin()` once admin roles are implemented
+    }
+
+    // Guild members - public read, authenticated write
+    match /members/{document=**} {
+      allow read: if true; // Public read for displaying roster
+      allow write: if isAuthenticated(); // Require authentication for writes
+      // TODO: Change to `if isAdmin()` once admin roles are implemented
+    }
+
+    // Raid events - public read, authenticated write
+    match /raids/{document=**} {
+      allow read: if true; // Public read for raid calendar
+      allow write: if isAuthenticated(); // Require authentication for writes
+      // TODO: Change to `if isAdmin()` once admin roles are implemented
+    }
+
+    // Default rule for other collections - deny all
+    match /{document=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}

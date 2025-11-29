@@ -18,22 +18,56 @@ A fully customizable guild management system for World of Warcraft guilds, built
 
 - Node.js 20+ or later
 - pnpm (recommended) or npm
+- Firebase account (free tier is sufficient)
 
-### Installation
+### Quick Setup
 
+1. **Clone and Install**
 ```bash
-# Clone the repository
 git clone <your-repo-url>
 cd GuildManager
-
-# Install dependencies
 pnpm install
+```
 
-# Start development server
+2. **Firebase Setup**
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Create a new project (or use existing)
+   - Enable Firestore Database
+   - Go to Project Settings > General
+   - Create a Web app and copy the config values
+
+3. **Environment Variables**
+```bash
+# Copy the example env file
+cp .env.example .env.local
+
+# Edit .env.local and add your Firebase credentials
+```
+
+4. **Start Development**
+```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+5. **Initial Setup**
+   - Open [http://localhost:3000](http://localhost:3000)
+   - The setup wizard will automatically appear
+   - Enter your guild name
+   - Choose a theme preset (6 options available)
+   - Click "Complete Setup"
+   - Done! Your guild management site is ready
+   - Configure additional details (server, region, faction) later in Admin Settings
+
+### Deployment
+
+**Deploy to Vercel:**
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/GuildManager)
+
+1. Click the Deploy button above
+2. Add your Firebase environment variables when prompted
+3. Deploy!
+4. Visit your site and complete the setup wizard
 
 ### Build for Production
 
@@ -81,11 +115,11 @@ Visit `/theme-demo` to see the complete design system showcase, including:
 
 - **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS v3 with CSS custom properties
+- **Styling**: Tailwind CSS v4 with CSS custom properties
 - **Components**: shadcn/ui (Radix UI primitives)
 - **Icons**: Lucide React
-- **State Management**: Zustand (to be implemented)
-- **Database**: Firebase Firestore (to be implemented)
+- **State Management**: React Context + Zustand (context implemented)
+- **Database**: Firebase Firestore
 - **Testing**: Vitest + Playwright (to be implemented)
 
 ## Development
@@ -133,7 +167,14 @@ See `CLAUDE.md` for complete design system documentation.
 - [x] Build WoW-specific components
 - [x] Create theme demo page
 
-### Phase 2: Core Features (Next)
+### Phase 2: Core Setup ✅ (Complete)
+- [x] Firebase integration
+- [x] Guild configuration system
+- [x] Setup wizard for first-time users
+- [x] Admin settings page
+- [x] Runtime configuration without code changes
+
+### Phase 3: Core Features (Next)
 - [ ] Implement guild roster with Firestore
 - [ ] Add member management (CRUD operations)
 - [ ] Create raid planning system
