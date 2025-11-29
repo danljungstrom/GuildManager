@@ -326,7 +326,7 @@ export default function TabNavLinksDemoPage() {
             <p className="mt-4"><strong className="text-foreground">Use regular Tabs component when:</strong></p>
             <ul className="space-y-2">
               <li>Content is all on the same page, just toggled</li>
-              <li>You don't want to change the URL</li>
+              <li>You don&apos;t want to change the URL</li>
               <li>State should be managed client-side only</li>
             </ul>
           </div>

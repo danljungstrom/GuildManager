@@ -14,7 +14,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ThemeColors } from '@/lib/types/guild-config.types';
-import { DEFAULT_THEME_COLORS, DEFAULT_DARK_THEME_COLORS } from '@/lib/types/guild-config.types';
 
 interface ThemePreset {
   id: string;
@@ -147,7 +146,7 @@ export default function ThemePresetsPage() {
   return (
     <ComponentDemoLayout
       title="Theme Presets"
-      description="Pre-built color schemes that can be applied with one click. Perfect starting points for your guild's branding."
+      description="Pre-built color schemes that can be applied with one click. Perfect starting points for your guild&apos;s branding."
     >
       {/* Live Preview */}
       <DemoSection
@@ -258,9 +257,9 @@ export default function ThemePresetsPage() {
               <strong className="text-foreground">Color Editor</strong>.
             </p>
             <ol className="space-y-2">
-              <li>Select a preset that's close to your desired look</li>
+              <li>Select a preset that&apos;s close to your desired look</li>
               <li>Navigate to the Color Editor page</li>
-              <li>Fine-tune individual colors to match your guild's branding</li>
+              <li>Fine-tune individual colors to match your guild&apos;s branding</li>
               <li>Export the final configuration when satisfied</li>
             </ol>
           </div>
@@ -281,7 +280,7 @@ export default function ThemePresetsPage() {
             </p>
             <p>
               These faction themes create instant brand recognition and help establish your
-              guild's identity in the WoW community.
+              guild&apos;s identity in the WoW community.
             </p>
           </div>
         </div>

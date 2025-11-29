@@ -365,10 +365,10 @@ export default function BreadcrumbDemoPage() {
       <DemoSection title="Accessibility">
         <div className="prose prose-sm max-w-none">
           <ul className="space-y-2 text-muted-foreground">
-            <li>Breadcrumb uses semantic <code className="text-primary">nav</code> element with <code className="text-primary">aria-label="breadcrumb"</code></li>
-            <li>Current page is marked with <code className="text-primary">aria-current="page"</code></li>
+            <li>Breadcrumb uses semantic <code className="text-primary">nav</code> element with <code className="text-primary">aria-label=&quot;breadcrumb&quot;</code></li>
+            <li>Current page is marked with <code className="text-primary">aria-current=&quot;page&quot;</code></li>
             <li>All links are keyboard accessible</li>
-            <li>Separators are marked with <code className="text-primary">aria-hidden="true"</code> to hide from screen readers</li>
+            <li>Separators are marked with <code className="text-primary">aria-hidden=&quot;true&quot;</code> to hide from screen readers</li>
             <li>Use descriptive link text that makes sense out of context</li>
             <li>Ensure sufficient color contrast for all breadcrumb text</li>
           </ul>

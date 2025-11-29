@@ -32,13 +32,13 @@ export default function TypographyTokenPage() {
       >
         <div className="space-y-4">
           <p className="text-base">
-            This is the default body text size. It's designed for comfortable reading across
+            This is the default body text size. It&apos;s designed for comfortable reading across
             all devices and screen sizes. The text uses the system font stack for optimal
             performance and native feel.
           </p>
           <p className="text-sm">
             This is small body text, often used for secondary information, captions, or
-            supporting content that doesn't need to be as prominent.
+            supporting content that doesn&apos;t need to be as prominent.
           </p>
           <p className="text-xs">
             This is extra small text, typically used for labels, metadata, or very minor
