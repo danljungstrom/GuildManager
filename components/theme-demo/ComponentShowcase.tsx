@@ -23,7 +23,7 @@ import { RoleIcon } from '@/components/wow/RoleIcon';
 import { SpecIcon } from '@/components/wow/SpecIcon';
 import { ProfessionIcon } from '@/components/wow/ProfessionIcon';
 import { AttendanceBadge } from '@/components/wow/AttendanceBadge';
-import { getAllClasses, CLASS_CONFIGS } from '@/lib/consts/classes';
+import { getAllClasses } from '@/lib/consts/classes';
 import { getAllRoles } from '@/lib/consts/roles';
 import { PROFESSIONS, PROFESSION_CONFIGS } from '@/lib/consts/professions';
 import type { Profession } from '@/lib/types/professions.types';

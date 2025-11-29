@@ -193,9 +193,9 @@ export default function InputDemoPage() {
           <ul className="space-y-2 text-muted-foreground">
             <li>Always use a <code className="text-primary">Label</code> component with inputs for accessibility</li>
             <li>Use appropriate <code className="text-primary">type</code> attributes for better mobile keyboard support</li>
-            <li>Provide clear placeholder text that doesn't replace labels</li>
+            <li>Provide clear placeholder text that doesn&apos;t replace labels</li>
             <li>Ensure sufficient color contrast for placeholder text</li>
-            <li>Use <code className="text-primary">aria-label</code> or <code className="text-primary">aria-labelledby</code> when visual labels aren't present</li>
+            <li>Use <code className="text-primary">aria-label</code> or <code className="text-primary">aria-labelledby</code> when visual labels aren&apos;t present</li>
           </ul>
         </div>
       </DemoSection>

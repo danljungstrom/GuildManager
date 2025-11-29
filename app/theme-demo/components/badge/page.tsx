@@ -201,10 +201,10 @@ export default function BadgeDemoPage() {
       <DemoSection title="Accessibility">
         <div className="prose prose-sm max-w-none">
           <ul className="space-y-2 text-muted-foreground">
-            <li>Badges are purely visual by default and don't receive keyboard focus</li>
+            <li>Badges are purely visual by default and don&apos;t receive keyboard focus</li>
             <li>If making badges interactive, ensure they are keyboard accessible (use button or link elements)</li>
             <li>Ensure sufficient color contrast between badge background and text</li>
-            <li>Don't rely solely on color to convey meaning - use text or icons as well</li>
+            <li>Don&apos;t rely solely on color to convey meaning - use text or icons as well</li>
             <li>For status badges, consider adding <code className="text-primary">aria-label</code> for screen readers</li>
           </ul>
         </div>

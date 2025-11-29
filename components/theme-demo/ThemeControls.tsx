@@ -11,11 +11,9 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockGuildConfig, alternativeThemes } from '@/lib/mock/mockGuildConfig';
-import type { ThemeColors } from '@/lib/types/guild-config.types';
-import { DEFAULT_THEME_COLORS, DEFAULT_DARK_THEME_COLORS } from '@/lib/types/guild-config.types';
+import { DEFAULT_DARK_THEME_COLORS } from '@/lib/types/guild-config.types';
 
 type ThemeName = 'default' | 'horde' | 'tbc' | 'wotlk';
 

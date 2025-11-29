@@ -233,7 +233,7 @@ export default function ColorEditorPage() {
           <Card className="p-4">
             <h4 className="font-semibold mb-2">Card Component</h4>
             <p className="text-sm text-muted-foreground">
-              This card uses the theme colors you're editing. Notice how the background,
+              This card uses the theme colors you&apos;re editing. Notice how the background,
               border, and text colors update as you adjust the sliders below.
             </p>
           </Card>
@@ -326,7 +326,7 @@ ${Object.entries(colors)
             <li>Foreground colors should have sufficient contrast with their background pairs</li>
             <li>Use the preview section to test color combinations</li>
             <li>Click the reset icon on individual colors to restore defaults</li>
-            <li>Export the configuration when you're satisfied with your colors</li>
+            <li>Export the configuration when you&apos;re satisfied with your colors</li>
           </ul>
         </div>
       </DemoSection>

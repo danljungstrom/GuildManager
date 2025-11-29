@@ -22,7 +22,6 @@ import {
   Home,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
 
 interface NavItem {
   title: string;

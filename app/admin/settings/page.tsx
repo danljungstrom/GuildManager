@@ -29,6 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { WoWExpansion, WoWRegion, WoWFaction } from '@/lib/types/guild-config.types';
 import { ArrowLeft } from 'lucide-react';
+import { GuildLogo } from '@/components/ui/guild-logo';
 import Link from 'next/link';
 
 export default function AdminSettingsPage() {
@@ -297,24 +298,7 @@ export default function AdminSettingsPage() {
                     </p>
                     <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border">
                       <div className="w-16 h-16 flex items-center justify-center bg-background rounded-lg border">
-                        {config?.theme.logo && config?.theme.logoType === 'theme-icon' && (
-                          <div
-                            className="w-16 h-16"
-                            dangerouslySetInnerHTML={{
-                              __html: (() => {
-                                const icon = require('@/lib/constants/theme-icons').getThemeIcon(config.theme.logo);
-                                return icon?.svg || '<div></div>';
-                              })()
-                            }}
-                          />
-                        )}
-                        {config?.theme.logoType === 'custom-image' && config?.theme.logo && (
-                          <img
-                            src={config.theme.logo}
-                            alt="Guild logo"
-                            className="w-full h-full object-contain"
-                          />
-                        )}
+                        <GuildLogo size="md" className="w-16 h-16" />
                       </div>
                       <div className="flex-1">
                         <p className="font-medium">
