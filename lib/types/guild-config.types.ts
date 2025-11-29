@@ -34,10 +34,20 @@ export interface ThemeColors {
 }
 
 /**
+ * Typography configuration for theme
+ * Defines which fonts to use for headings and body text
+ */
+export interface ThemeTypography {
+  headingFont: string; // CSS variable name, e.g., 'var(--font-heading-gold)'
+  bodyFont: string;    // CSS variable name, e.g., 'var(--font-body)'
+}
+
+/**
  * Theme configuration including colors and styling preferences
  */
 export interface ThemeConfig {
   colors: ThemeColors;
+  typography?: ThemeTypography; // Optional typography configuration
   darkMode?: boolean;
   logo?: string; // URL to custom logo image OR theme icon ID
   logoType?: 'theme-icon' | 'custom-image';

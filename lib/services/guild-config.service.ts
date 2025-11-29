@@ -63,6 +63,7 @@ export async function initializeGuildConfig(
     },
     theme: {
       colors: themePreset.colors.light, // Default to light theme colors
+      typography: themePreset.typography, // Include typography configuration
       darkMode: false,
       logo: input.themePresetId, // Set theme icon ID as default logo
       logoType: 'theme-icon',

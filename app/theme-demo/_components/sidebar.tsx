@@ -16,7 +16,6 @@ import {
   Palette,
   Type,
   Box,
-  Settings,
   BookOpen,
   ChevronRight,
   Home,
@@ -39,6 +38,7 @@ const navigationSections: NavSection[] = [
     title: 'Overview',
     items: [
       { title: 'Introduction', href: '/theme-demo', icon: Home },
+      { title: 'Documentation', href: '/theme-demo/reference', icon: BookOpen },
     ],
   },
   {
@@ -63,15 +63,8 @@ const navigationSections: NavSection[] = [
   {
     title: 'Config',
     items: [
-      { title: 'Color Editor', href: '/theme-demo/config/colors', icon: Settings },
-      { title: 'Preview', href: '/theme-demo/config/preview', icon: Settings },
-      { title: 'Presets', href: '/theme-demo/config/presets', icon: Settings },
-    ],
-  },
-  {
-    title: 'Reference',
-    items: [
-      { title: 'Documentation', href: '/theme-demo/reference', icon: BookOpen },
+      { title: 'Theme Picker', href: '/theme-demo/config/presets', icon: Palette },
+      //{ title: 'Color Editor', href: '/theme-demo/config/colors', icon: Settings },
     ],
   },
 ];

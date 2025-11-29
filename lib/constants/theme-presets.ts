@@ -1,4 +1,4 @@
-import { ThemeColors } from '@/lib/types/guild-config.types';
+import { ThemeColors, ThemeTypography } from '@/lib/types/guild-config.types';
 
 /**
  * Theme Preset Definition
@@ -11,6 +11,7 @@ export interface ThemePreset {
     light: ThemeColors;
     dark: ThemeColors;
   };
+  typography: ThemeTypography;
 }
 
 /**
@@ -60,9 +61,13 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
         ring: '41 40% 60%',
       },
     },
+    typography: {
+      headingFont: 'var(--font-heading-spartan)',
+      bodyFont: 'var(--font-body)',
+    },
   },
 
-    shadow: {
+  shadow: {
     id: 'shadow',
     name: 'Shadow',
     description: 'Dark mystical purple for warlocks and shadow priests',
@@ -91,9 +96,9 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
         secondaryForeground: '270 5% 98%',
         accent: '271 91% 65%',
         accentForeground: '0 0% 100%',
-        background: '270 15% 8%',
-        foreground: '270 5% 98%',
-        card: '270 12% 13%',
+        background: '270 15% 4.1%',
+        foreground: '270 9.1% 97.8%',
+        card: '270 15% 4.1%',
         cardForeground: '270 5% 98%',
         muted: '270 15% 19%',
         mutedForeground: '270 5% 64%',
@@ -101,6 +106,10 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
         input: '270 15% 23%',
         ring: '271 81% 56%',
       },
+    },
+    typography: {
+      headingFont: 'var(--font-heading-shadow)',
+      bodyFont: 'var(--font-body)',
     },
   },
 
@@ -135,7 +144,7 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
         accentForeground: '0 0% 100%',
         background: '0 5% 8%',
         foreground: '0 0% 98%',
-        card: '0 5% 12%',
+        card: '0 5% 8%',
         cardForeground: '0 0% 98%',
         muted: '0 8% 18%',
         mutedForeground: '0 0% 64%',
@@ -143,6 +152,10 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
         input: '0 8% 22%',
         ring: '0 72% 51%',
       },
+    },
+    typography: {
+      headingFont: 'var(--font-heading-horde)',
+      bodyFont: 'var(--font-body)',
     },
   },
 
@@ -177,7 +190,7 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
         accentForeground: '222 47% 11%',
         background: '222 47% 8%',
         foreground: '210 40% 98%',
-        card: '222 40% 14%',
+        card: '222 47% 8%',
         cardForeground: '210 40% 98%',
         muted: '217 33% 20%',
         mutedForeground: '215 20% 65%',
@@ -185,6 +198,10 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
         input: '217 30% 24%',
         ring: '217 91% 60%',
       },
+    },
+    typography: {
+      headingFont: 'var(--font-heading-alliance)',
+      bodyFont: 'var(--font-body)',
     },
   },
 
@@ -219,7 +236,7 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
         accentForeground: '0 0% 100%',
         background: '140 15% 8%',
         foreground: '138 13% 98%',
-        card: '140 12% 13%',
+        card: '140 15% 8%',
         cardForeground: '138 13% 98%',
         muted: '140 15% 19%',
         mutedForeground: '140 5% 64%',
@@ -227,6 +244,10 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
         input: '140 15% 23%',
         ring: '142 71% 45%',
       },
+    },
+    typography: {
+      headingFont: 'var(--font-heading-nature)',
+      bodyFont: 'var(--font-body)',
     },
   },
 
@@ -261,7 +282,7 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
         accentForeground: '0 0% 100%',
         background: '200 20% 8%',
         foreground: '200 18% 98%',
-        card: '200 18% 13%',
+        card: '200 20% 8%',
         cardForeground: '200 18% 98%',
         muted: '200 20% 19%',
         mutedForeground: '200 8% 64%',
@@ -269,6 +290,10 @@ export const THEME_PRESETS: Record<string, ThemePreset> = {
         input: '200 20% 23%',
         ring: '199 89% 48%',
       },
+    },
+    typography: {
+      headingFont: 'var(--font-heading-frost)',
+      bodyFont: 'var(--font-body)',
     },
   },
 };
@@ -288,8 +313,8 @@ export function getAllThemePresets(): ThemePreset[] {
 }
 
 /**
- * Get the default theme preset (Gold)
+ * Get the default theme preset (Spartan/Gold)
  */
 export function getDefaultThemePreset(): ThemePreset {
-  return THEME_PRESETS.gold;
+  return THEME_PRESETS.spartan;
 }

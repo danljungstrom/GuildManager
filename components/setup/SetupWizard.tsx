@@ -19,7 +19,8 @@ export default function SetupWizard() {
   const router = useRouter();
 
   const [guildName, setGuildName] = useState('');
-  const [selectedThemeId, setSelectedThemeId] = useState('gold');
+  const [nameFieldTouched, setNameFieldTouched] = useState(false);
+  const [selectedThemeId, setSelectedThemeId] = useState('spartan');
   const [nameError, setNameError] = useState('');
 
   const themePresets = getAllThemePresets();
@@ -35,12 +36,19 @@ export default function SetupWizard() {
 
     // Apply CSS variables to the root element
     const root = document.documentElement;
+
+    // Apply color variables
     Object.entries(colors).forEach(([key, value]) => {
       // Convert camelCase to kebab-case (e.g., primaryForeground -> primary-foreground)
       const cssVarName = key.replace(/([A-Z])/g, '-$1').toLowerCase();
       root.style.setProperty(`--${cssVarName}`, value);
     });
-  }, [selectedThemeId, themePresets]);
+
+    // Apply typography (font) variables
+    if (selectedPreset.typography) {
+      root.style.setProperty('--font-heading', selectedPreset.typography.headingFont);
+    }
+  }, [selectedThemeId]);
 
   const validateGuildName = (name: string): boolean => {
     if (!name.trim()) {
@@ -60,6 +68,7 @@ export default function SetupWizard() {
   };
 
   const handleNameNext = () => {
+    setNameFieldTouched(true);
     if (validateGuildName(guildName)) {
       setStep(2);
     }
@@ -92,7 +101,7 @@ export default function SetupWizard() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
       <Card className="max-w-2xl w-full">
         <CardHeader>
-          <CardTitle className="text-3xl">Welcome to GuildManager!</CardTitle>
+          <CardTitle className="text-3xl font-heading">Welcome to GuildManager!</CardTitle>
           <CardDescription>
             Let&apos;s get your guild set up in just a few quick steps
           </CardDescription>
@@ -115,7 +124,7 @@ export default function SetupWizard() {
           {step === 1 && (
             <div className="space-y-4">
               <div>
-                <h2 className="text-xl font-semibold mb-2">What&apos;s your guild name?</h2>
+                <h2 className="text-xl font-semibold mb-2 font-heading">What&apos;s your guild name?</h2>
                 <p className="text-sm text-muted-foreground">
                   This is a quick setup to get you started. You can configure additional details like
                   server, region, faction, and expansion later in admin settings.
@@ -123,19 +132,22 @@ export default function SetupWizard() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="name">Guild Name</Label>
+                <Label htmlFor="name" className="font-heading">Guild Name</Label>
                 <Input
                   id="name"
                   value={guildName}
                   onChange={(e) => {
                     setGuildName(e.target.value);
-                    if (nameError) validateGuildName(e.target.value);
+                    if (nameFieldTouched) validateGuildName(e.target.value);
                   }}
-                  onBlur={() => validateGuildName(guildName)}
+                  onBlur={() => {
+                    setNameFieldTouched(true);
+                    validateGuildName(guildName);
+                  }}
                   placeholder="Enter your guild name"
                   autoFocus
                 />
-                {nameError && (
+                {nameFieldTouched && nameError && (
                   <p className="text-sm text-destructive">{nameError}</p>
                 )}
               </div>
@@ -152,7 +164,7 @@ export default function SetupWizard() {
           {step === 2 && (
             <div className="space-y-4">
               <div>
-                <h2 className="text-xl font-semibold mb-2">Choose a theme</h2>
+                <h2 className="text-xl font-semibold mb-2 font-heading">Choose a theme</h2>
                 <p className="text-sm text-muted-foreground">
                   Select a color scheme for your guild website. You can fully customize colors later in Theme Settings.
                 </p>
@@ -172,7 +184,7 @@ export default function SetupWizard() {
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
                           {themeIcon && (
-                            <div 
+                            <div
                               className="w-12 h-12 flex-shrink-0"
                               style={{
                                 backgroundColor: `hsl(${preset.colors.light.primary})`,
@@ -182,7 +194,15 @@ export default function SetupWizard() {
                             />
                           )}
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold">{preset.name}</h3>
+                            <h3
+                              className="font-semibold"
+                              style={{
+                                fontFamily: `var(--font-heading-${preset.id})`,
+                                fontSize: ['horde', 'alliance', 'shadow', 'frost'].includes(preset.id) ? '18px' : '16px'
+                              }}
+                            >
+                              {preset.name}
+                            </h3>
                             <p className="text-xs text-muted-foreground">{preset.description}</p>
                           </div>
                         </div>
@@ -207,7 +227,7 @@ export default function SetupWizard() {
           {step === 3 && (
             <div className="space-y-4">
               <div>
-                <h2 className="text-xl font-semibold mb-2">Ready to launch!</h2>
+                <h2 className="text-xl font-semibold mb-2 font-heading">Ready to launch!</h2>
                 <p className="text-sm text-muted-foreground">
                   Review your selections and complete the setup.
                 </p>
@@ -216,15 +236,15 @@ export default function SetupWizard() {
               <Card>
                 <CardContent className="pt-6 space-y-4">
                   <div>
-                    <Label className="text-muted-foreground">Guild Name</Label>
-                    <p className="text-lg font-semibold">{guildName}</p>
+                    <Label className="text-muted-foreground font-heading">Guild Name</Label>
+                    <p className="text-lg font-semibold font-heading">{guildName}</p>
                   </div>
 
                   <div>
-                    <Label className="text-muted-foreground">Theme</Label>
+                    <Label className="text-muted-foreground font-heading">Theme</Label>
                     <div className="flex items-center gap-3 mt-1">
                       {selectedPreset && getThemeIcon(selectedPreset.id) && (
-                        <div 
+                        <div
                           className="w-12 h-12 flex-shrink-0"
                           style={{
                             backgroundColor: `hsl(${selectedPreset.colors.light.primary})`,
@@ -233,7 +253,15 @@ export default function SetupWizard() {
                           }}
                         />
                       )}
-                      <span className="font-semibold">{selectedPreset?.name}</span>
+                      <span
+                        className="font-semibold"
+                        style={{
+                          fontFamily: selectedPreset ? `var(--font-heading-${selectedPreset.id})` : undefined,
+                          fontSize: selectedPreset && ['horde', 'alliance', 'shadow', 'frost'].includes(selectedPreset.id) ? '18px' : '16px'
+                        }}
+                      >
+                        {selectedPreset?.name}
+                      </span>
                     </div>
                   </div>
 

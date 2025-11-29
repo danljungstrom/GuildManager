@@ -6,10 +6,11 @@
  * Provides persistent sidebar navigation for the entire theme-demo section.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar, MobileSidebar } from './_components/sidebar';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
+import { applyStoredTheme } from '@/lib/stores/theme-store';
 
 export default function ThemeDemoLayout({
   children,
@@ -17,6 +18,11 @@ export default function ThemeDemoLayout({
   children: React.ReactNode;
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Apply stored theme on mount
+  useEffect(() => {
+    applyStoredTheme();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">

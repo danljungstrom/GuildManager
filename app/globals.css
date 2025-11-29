@@ -4,6 +4,21 @@
 
 @layer base {
   :root {
+    /* Typography System */
+    /* Body font - shared across all themes */
+    --font-body: var(--font-body-fallback, 'Inter', ui-sans-serif, system-ui, sans-serif);
+
+    /* Theme-specific heading fonts */
+    --font-heading-spartan: var(--font-heading-spartan-fallback, 'Cinzel Decorative', serif);
+    --font-heading-horde: var(--font-heading-horde-fallback, 'Metal Mania', cursive);
+    --font-heading-alliance: var(--font-heading-alliance-fallback, 'New Rocker', cursive);
+    --font-heading-shadow: var(--font-heading-shadow-fallback, 'Almendra SC', serif);
+    --font-heading-nature: var(--font-heading-nature-fallback, 'Uncial Antiqua', cursive);
+    --font-heading-frost: var(--font-heading-frost-fallback, 'Wendy One', sans-serif);
+
+    /* Active theme font (defaults to Spartan/Gold) */
+    --font-heading: var(--font-heading-spartan);
+
     /* Base color system - Light Mode */
     --background: 0 0% 100%;
     --foreground: 20 14.3% 4.1%;
@@ -63,6 +78,16 @@
     --attunement-bwl: 352 56% 45%;     /* #C41F3B */
     --attunement-uldum: 51 100% 50%;   /* #FFD700 */
     --attunement-naxx: 165 100% 50%;   /* #00FFBA */
+
+    /* Sidebar colors - Light Mode */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 20 14.3% 4.1%;
+    --sidebar-primary: 41 40% 60%;
+    --sidebar-primary-foreground: 20 14.3% 4.1%;
+    --sidebar-accent: 60 4.8% 95.9%;
+    --sidebar-accent-foreground: 25 5.3% 44.7%;
+    --sidebar-border: 20 5.9% 90%;
+    --sidebar-ring: 41 40% 60%;
   }
 
   .dark {
@@ -99,6 +124,16 @@
     /* WoW Role Colors remain the same in dark mode */
     /* Semantic Colors remain the same in dark mode */
     /* Attunement Colors remain the same in dark mode */
+
+    /* Sidebar colors - Dark Mode */
+    --sidebar-background: 20 14.3% 4.1%;
+    --sidebar-foreground: 60 9.1% 97.8%;
+    --sidebar-primary: 41 40% 60%;
+    --sidebar-primary-foreground: 20 14.3% 4.1%;
+    --sidebar-accent: 12 6.5% 15.1%;
+    --sidebar-accent-foreground: 60 9.1% 97.8%;
+    --sidebar-border: 12 6.5% 15.1%;
+    --sidebar-ring: 41 40% 60%;
   }
 }
 
@@ -109,7 +144,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
     position: relative;
   }
@@ -127,6 +162,10 @@
     opacity: 0.03;
     z-index: -1;
     pointer-events: none;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
   }
   code, pre {
     font-family: var(--font-geist-mono), ui-monospace, monospace;
