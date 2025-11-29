@@ -28,7 +28,7 @@ A fully customizable guild management system for World of Warcraft guilds, built
    - Click **"Create a project"** → Enter name → Disable Analytics → Create
    - Enable Firestore: **Build** → **Firestore Database** → **Create database** → Standard → Choose region → Production mode → Enable
    - Create Web App: **Project Overview** (⚙️) → **Add app** → **Web** (`</>`) → Register app (nickname: "*Guildname*", no hosting)
-   - **Copy the entire code block** that appears (looks like this):
+   - **Either copy the entire code block or keep the page open**:
    
    ```javascript
    // Import the functions you need from the SDKs you need
@@ -53,8 +53,6 @@ A fully customizable guild management system for World of Warcraft guilds, built
    const app = initializeApp(firebaseConfig);
    const analytics = getAnalytics(app);
    ```
-   
-   > 💡 **Tip**: Copy the whole thing - we'll extract the values automatically!
 
 2. **Deploy to Vercel** (3 min)
    - Click the Deploy button above
