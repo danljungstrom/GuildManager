@@ -65,11 +65,13 @@ export function GuildLogo({ size = 'md', showFrame, className }: GuildLogoProps)
 
     // Render theme SVG icon
     return (
-      <div
-        className={cn(sizeClass, 'flex items-center justify-center', className)}
-        dangerouslySetInnerHTML={{ __html: themeIcon.svg }}
-        aria-label={`${themeIcon.name} theme icon`}
-      />
+      <div className={cn(sizeClass, 'flex items-center justify-center', className)}>
+        <img
+          src={themeIcon.svg}
+          alt={`${themeIcon.name} theme icon`}
+          className="w-full h-full object-contain"
+        />
+      </div>
     );
   }
 

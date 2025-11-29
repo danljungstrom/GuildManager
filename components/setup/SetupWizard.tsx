@@ -172,33 +172,19 @@ export default function SetupWizard() {
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
                           {themeIcon && (
-                            <div
+                            <div 
                               className="w-12 h-12 flex-shrink-0"
-                              dangerouslySetInnerHTML={{ __html: themeIcon.svg }}
-                              aria-label={`${preset.name} icon`}
+                              style={{
+                                backgroundColor: `hsl(${preset.colors.light.primary})`,
+                                WebkitMask: `url(${themeIcon.svg}) center/contain no-repeat`,
+                                mask: `url(${themeIcon.svg}) center/contain no-repeat`
+                              }}
                             />
                           )}
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold">{preset.name}</h3>
                             <p className="text-xs text-muted-foreground">{preset.description}</p>
                           </div>
-                        </div>
-                        <div className="flex gap-2 mt-3">
-                          <div
-                            className="h-8 w-8 rounded border"
-                            style={{ backgroundColor: `hsl(${preset.colors.light.primary})` }}
-                            title="Primary"
-                          />
-                          <div
-                            className="h-8 w-8 rounded border"
-                            style={{ backgroundColor: `hsl(${preset.colors.light.accent})` }}
-                            title="Accent"
-                          />
-                          <div
-                            className="h-8 w-8 rounded border"
-                            style={{ backgroundColor: `hsl(${preset.colors.light.background})` }}
-                            title="Background"
-                          />
                         </div>
                       </div>
                     </button>
@@ -238,26 +224,15 @@ export default function SetupWizard() {
                     <Label className="text-muted-foreground">Theme</Label>
                     <div className="flex items-center gap-3 mt-1">
                       {selectedPreset && getThemeIcon(selectedPreset.id) && (
-                        <div
+                        <div 
                           className="w-12 h-12 flex-shrink-0"
-                          dangerouslySetInnerHTML={{ __html: getThemeIcon(selectedPreset.id)!.svg }}
-                          aria-label={`${selectedPreset.name} icon`}
+                          style={{
+                            backgroundColor: `hsl(${selectedPreset.colors.light.primary})`,
+                            WebkitMask: `url(${getThemeIcon(selectedPreset.id)!.svg}) center/contain no-repeat`,
+                            mask: `url(${getThemeIcon(selectedPreset.id)!.svg}) center/contain no-repeat`
+                          }}
                         />
                       )}
-                      <div className="flex gap-2">
-                        {selectedPreset && (
-                          <>
-                            <div
-                              className="h-8 w-8 rounded border"
-                              style={{ backgroundColor: `hsl(${selectedPreset.colors.light.primary})` }}
-                            />
-                            <div
-                              className="h-8 w-8 rounded border"
-                              style={{ backgroundColor: `hsl(${selectedPreset.colors.light.accent})` }}
-                            />
-                          </>
-                        )}
-                      </div>
                       <span className="font-semibold">{selectedPreset?.name}</span>
                     </div>
                   </div>
