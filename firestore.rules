@@ -16,12 +16,13 @@ service cloud.firestore {
       // Later change to: request.auth.token.admin == true
     }
 
-    // Guild configuration - public read, authenticated write
-    // IMPORTANT: In production, restrict writes to admins only
+    // Guild configuration - public read and write
+    // IMPORTANT: In production, restrict writes to admins only with authentication
+    // For now, allow public write to enable initial setup without auth
     match /config/{document=**} {
       allow read: if true; // Public read access for guild info
-      allow write: if isAuthenticated(); // Require authentication for writes
-      // TODO: Change to `if isAdmin()` once admin roles are implemented
+      allow write: if true; // Allow public write for initial setup
+      // TODO: Change to `if isAdmin()` once Firebase Authentication is implemented
     }
 
     // Guild members - public read, authenticated write

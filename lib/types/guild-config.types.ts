@@ -1,3 +1,5 @@
+import { RoleMapping, PermissionLevel } from './auth.types';
+
 /**
  * Guild Configuration Types
  *
@@ -9,6 +11,18 @@
 export type WoWRegion = 'US' | 'EU' | 'KR' | 'TW' | 'CN';
 export type WoWExpansion = 'classic' | 'tbc' | 'wotlk' | 'cata' | 'retail';
 export type WoWFaction = 'Alliance' | 'Horde';
+
+/**
+ * Discord integration settings
+ */
+export interface DiscordSettings {
+  enabled: boolean;
+  guildId?: string; // Discord server ID
+  guildName?: string; // For display
+  roleMappings: RoleMapping[];
+  // Owner is the person who set up the site - always has SuperAdmin
+  ownerId?: string; // Discord user ID of the site owner
+}
 
 /**
  * Theme color configuration
@@ -34,10 +48,20 @@ export interface ThemeColors {
 }
 
 /**
+ * Typography configuration for theme
+ * Defines which fonts to use for headings and body text
+ */
+export interface ThemeTypography {
+  headingFont: string; // CSS variable name, e.g., 'var(--font-heading-gold)'
+  bodyFont: string;    // CSS variable name, e.g., 'var(--font-body)'
+}
+
+/**
  * Theme configuration including colors and styling preferences
  */
 export interface ThemeConfig {
   colors: ThemeColors;
+  typography?: ThemeTypography; // Optional typography configuration
   darkMode?: boolean;
   logo?: string; // URL to custom logo image OR theme icon ID
   logoType?: 'theme-icon' | 'custom-image';
@@ -72,6 +96,7 @@ export interface GuildConfig {
   id: string;
   metadata: GuildMetadata;
   theme: ThemeConfig;
+  discord?: DiscordSettings;
   features?: {
     enableRaidPlanning?: boolean;
     enableAttunementTracking?: boolean;
@@ -81,6 +106,14 @@ export interface GuildConfig {
   createdAt?: string;
   updatedAt?: string;
 }
+
+/**
+ * Default Discord settings
+ */
+export const DEFAULT_DISCORD_SETTINGS: DiscordSettings = {
+  enabled: true,
+  roleMappings: [],
+};
 
 /**
  * Default theme colors (can be overridden by guild config)

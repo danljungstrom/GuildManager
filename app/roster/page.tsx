@@ -1,64 +1,83 @@
-/**
- * Roster Page
- *
- * Placeholder page for guild roster management.
- * This will be fully implemented in future phases.
- */
-
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
 export const metadata = {
   title: 'Guild Roster - GuildManager',
   description: 'View and manage your guild roster',
-};
+}
 
 export default function RosterPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 flex h-16 items-center">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-            </Link>
-          </Button>
-        </div>
-      </header>
+    <div className="container mx-auto p-6 space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-primary">Guild Roster</h1>
+        <p className="text-muted-foreground mt-2">
+          View and manage all guild members
+        </p>
+      </div>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle>Guild Roster</CardTitle>
-              <CardDescription>
-                This page will display your guild roster with member details, classes, roles, and
-                more.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-                The roster page is currently under development. It will include:
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>All Members</CardTitle>
+            <CardDescription>Complete list of guild members</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-12">
+              <p className="text-muted-foreground mb-4">
+                No members found
               </p>
-              <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground ml-4">
-                <li>Complete guild member listing with class and role icons</li>
-                <li>Filtering and sorting by class, role, rank</li>
-                <li>Attunement tracking for raid content</li>
-                <li>Profession tracking for crafters</li>
-                <li>Admin controls for member management</li>
-              </ul>
-              <div className="pt-4">
-                <Button asChild>
-                  <Link href="/theme-demo">View Theme Demo</Link>
-                </Button>
+              <p className="text-sm text-muted-foreground">
+                Guild roster data will appear here once members are added
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Roster Statistics</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Total Members:</span>
+                <Badge variant="secondary">0</Badge>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Main Raiders:</span>
+                <Badge variant="secondary">0</Badge>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Recruits:</span>
+                <Badge variant="secondary">0</Badge>
               </div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Class Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                No class data available
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Role Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                No role data available
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </main>
+      </div>
     </div>
-  );
+  )
 }

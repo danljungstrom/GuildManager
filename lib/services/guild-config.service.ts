@@ -1,6 +1,6 @@
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { GuildConfig } from '@/lib/types/guild-config.types';
+import { GuildConfig, DEFAULT_DISCORD_SETTINGS } from '@/lib/types/guild-config.types';
 import { FIRESTORE_PATHS } from '@/lib/constants/firestore-paths';
 import { getThemePreset } from '@/lib/constants/theme-presets';
 
@@ -11,6 +11,7 @@ import { getThemePreset } from '@/lib/constants/theme-presets';
 export interface GuildConfigInput {
   name: string;
   themePresetId: string;
+  ownerId?: string; // Discord user ID of the site owner
 }
 
 /**
@@ -63,10 +64,15 @@ export async function initializeGuildConfig(
     },
     theme: {
       colors: themePreset.colors.light, // Default to light theme colors
+      typography: themePreset.typography, // Include typography configuration
       darkMode: false,
       logo: input.themePresetId, // Set theme icon ID as default logo
       logoType: 'theme-icon',
       logoFrame: false,
+    },
+    discord: {
+      ...DEFAULT_DISCORD_SETTINGS,
+      ownerId: input.ownerId, // Set the owner from setup
     },
     features: {
       enableRaidPlanning: true,

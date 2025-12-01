@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useGuild } from '@/lib/contexts/GuildContext';
+import { useThemeStore } from '@/lib/stores/theme-store';
 import { getThemeIcon } from '@/lib/constants/theme-icons';
 import { getLogoFrameStyles, cn } from '@/lib/utils';
 
@@ -28,9 +29,11 @@ const sizeClasses = {
  * - Responsive sizing (sm, md, lg)
  * - Optional frame for images without transparency
  * - Fallback to theme icon if custom image fails
+ * - Automatically updates when theme preset changes (for theme icons)
  */
 export function GuildLogo({ size = 'md', showFrame, className }: GuildLogoProps) {
   const { config } = useGuild();
+  const { activePresetId } = useThemeStore();
   const [imageError, setImageError] = useState(false);
 
   // Determine size class
@@ -40,12 +43,14 @@ export function GuildLogo({ size = 'md', showFrame, className }: GuildLogoProps)
   const logoType = config?.theme.logoType || 'theme-icon';
   const logoUrl = config?.theme.logo;
   const logoFrame = showFrame !== undefined ? showFrame : (config?.theme.logoFrame ?? false);
-  const themeColor = config?.theme.colors.primary || '41 40% 60%';
 
   // If using theme icon or custom image failed, display SVG icon
   if (logoType === 'theme-icon' || imageError || !logoUrl) {
-    // Determine which theme icon to use
-    const themeIconId = logoUrl || 'gold'; // Use logo as icon ID if set, otherwise default to gold
+    // For theme icons, prefer the active preset ID from Zustand store
+    // This ensures the logo updates immediately when theme changes
+    const themeIconId = (logoType === 'theme-icon' && activePresetId) 
+      ? activePresetId 
+      : (logoUrl || 'spartan');
     const themeIcon = getThemeIcon(themeIconId);
 
     if (!themeIcon) {
@@ -63,20 +68,28 @@ export function GuildLogo({ size = 'md', showFrame, className }: GuildLogoProps)
       );
     }
 
-    // Render theme SVG icon
+    // Render theme SVG icon with primary color
+    // Use hsl(var(--primary)) so it updates reactively when theme changes
     return (
-      <div className={cn(sizeClass, 'flex items-center justify-center', className)}>
-        <img
-          src={themeIcon.svg}
-          alt={`${themeIcon.name} theme icon`}
-          className="w-full h-full object-contain"
-        />
-      </div>
+      <div 
+        className={cn(sizeClass, 'flex items-center justify-center', className)}
+        style={{
+          backgroundColor: 'hsl(var(--primary))',
+          maskImage: `url(${themeIcon.svg})`,
+          WebkitMaskImage: `url(${themeIcon.svg})`,
+          maskSize: 'contain',
+          WebkitMaskSize: 'contain',
+          maskRepeat: 'no-repeat',
+          WebkitMaskRepeat: 'no-repeat',
+          maskPosition: 'center',
+          WebkitMaskPosition: 'center',
+        }}
+      />
     );
   }
 
   // If using custom image
-  const frameStyles = logoFrame ? getLogoFrameStyles(false, themeColor) : {};
+  const frameStyles = logoFrame ? getLogoFrameStyles(false, 'var(--primary)') : {};
 
   return (
     <div className={cn(sizeClass, 'flex items-center justify-center', className)} style={frameStyles}>
