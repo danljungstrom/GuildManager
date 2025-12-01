@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useGuild } from '@/lib/contexts/GuildContext';
 import { useThemeStore } from '@/lib/stores/theme-store';
 import { getThemeIcon } from '@/lib/constants/theme-icons';
@@ -92,12 +93,14 @@ export function GuildLogo({ size = 'md', showFrame, className }: GuildLogoProps)
   const frameStyles = logoFrame ? getLogoFrameStyles(false, 'var(--primary)') : {};
 
   return (
-    <div className={cn(sizeClass, 'flex items-center justify-center', className)} style={frameStyles}>
-      <img
+    <div className={cn(sizeClass, 'flex items-center justify-center relative', className)} style={frameStyles}>
+      <Image
         src={logoUrl}
         alt="Guild Logo"
-        className={cn('w-full h-full object-contain', logoFrame && 'rounded')}
+        fill
+        className={cn('object-contain', logoFrame && 'rounded')}
         onError={() => setImageError(true)}
+        unoptimized // Custom URLs may not be optimizable
       />
     </div>
   );

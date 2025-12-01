@@ -12,7 +12,7 @@ import { useGuild } from '@/lib/contexts/GuildContext';
 import { useAuth } from '@/lib/contexts/AdminContext';
 import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, LogOut } from 'lucide-react';
 
 // Discord icon component
 function DiscordIcon({ className }: { className?: string }) {
@@ -33,7 +33,7 @@ export default function SetupWizard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { refreshConfig } = useGuild();
-  const { user, isAuthenticated, loading: authLoading, loginWithDiscord } = useAuth();
+  const { user, isAuthenticated, loading: authLoading, loginWithDiscord, logout } = useAuth();
   const router = useRouter();
 
   const [guildName, setGuildName] = useState('');
@@ -43,12 +43,7 @@ export default function SetupWizard() {
 
   const themePresets = getAllThemePresets();
 
-  // Auto-advance to step 1 once authenticated
-  useEffect(() => {
-    if (isAuthenticated && step === 0) {
-      setStep(1);
-    }
-  }, [isAuthenticated, step]);
+  // Don't auto-advance - let user confirm their account
 
   // Apply theme preview when theme is selected
   useEffect(() => {
@@ -73,7 +68,7 @@ export default function SetupWizard() {
     if (selectedPreset.typography) {
       root.style.setProperty('--font-heading', selectedPreset.typography.headingFont);
     }
-  }, [selectedThemeId]);
+  }, [selectedThemeId, themePresets]);
 
   const validateGuildName = (name: string): boolean => {
     if (!name.trim()) {
@@ -164,16 +159,43 @@ export default function SetupWizard() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                 </div>
               ) : isAuthenticated && user ? (
-                <div className="flex items-center gap-4 p-4 bg-primary/10 rounded-lg">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={user.avatar} alt={user.displayName} />
-                    <AvatarFallback>{user.displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-medium">{user.displayName}</p>
-                    <p className="text-sm text-muted-foreground">@{user.discordUsername}</p>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-4 bg-primary/10 rounded-lg">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={user.avatar} alt={user.displayName} />
+                      <AvatarFallback>{user.displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium">{user.displayName}</p>
+                      <p className="text-sm text-muted-foreground">@{user.discordUsername}</p>
+                    </div>
+                    <CheckCircle2 className="h-6 w-6 text-primary" />
                   </div>
-                  <CheckCircle2 className="h-6 w-6 text-primary" />
+                  
+                  <div className="flex items-start gap-2 p-3 bg-muted rounded-lg">
+                    <AlertCircle className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                    <div className="text-sm text-muted-foreground">
+                      This account will become the <strong className="text-foreground">site owner</strong> with 
+                      permanent Super Admin access. Make sure this is the correct account before continuing.
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={logout}
+                      className="flex-1"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Switch Account
+                    </Button>
+                    <Button 
+                      onClick={() => setStep(1)} 
+                      className="flex-1"
+                    >
+                      Continue as {user.displayName}
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -194,15 +216,6 @@ export default function SetupWizard() {
                   </Button>
                 </div>
               )}
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button 
-                  onClick={() => setStep(1)} 
-                  disabled={!isAuthenticated}
-                >
-                  Next
-                </Button>
-              </div>
             </div>
           )}
 
@@ -238,7 +251,10 @@ export default function SetupWizard() {
                 )}
               </div>
 
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-between gap-2 pt-4">
+                <Button variant="outline" onClick={() => setStep(0)}>
+                  Back
+                </Button>
                 <Button onClick={handleNameNext} disabled={!guildName.trim()}>
                   Next
                 </Button>

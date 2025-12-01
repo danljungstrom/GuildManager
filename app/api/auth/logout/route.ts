@@ -6,7 +6,7 @@ import { AUTH_COOKIE_NAME } from '@/lib/auth/discord';
  * 
  * Logs out the user by clearing the auth session cookie
  */
-export async function POST(request: NextRequest) {
+export async function POST() {
   const response = NextResponse.json({ success: true });
   
   // Clear the auth session cookie

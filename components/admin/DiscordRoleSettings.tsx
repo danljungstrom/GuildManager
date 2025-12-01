@@ -62,7 +62,7 @@ export function DiscordRoleSettings() {
         setNeedsBot(true);
         setError('A Discord bot is required to fetch all server roles');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to fetch Discord roles');
     } finally {
       setLoading(false);
@@ -117,7 +117,7 @@ export function DiscordRoleSettings() {
         },
       });
       await refreshConfig();
-    } catch (err) {
+    } catch {
       setError('Failed to save role mappings');
     } finally {
       setSaving(false);

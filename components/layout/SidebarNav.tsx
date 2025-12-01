@@ -33,7 +33,7 @@ export interface NavItem {
 export const navigationItems: NavItem[] = [
   {
     label: "Dashboard",
-    href: "/dashboard",
+    href: "/",
     icon: Home,
   },
   {
@@ -79,8 +79,8 @@ export function SidebarNav() {
     if (isChild) {
       return pathname === href
     }
-    // For dashboard, use exact match
-    if (href === "/dashboard") {
+    // For dashboard (home), use exact match
+    if (href === "/") {
       return pathname === href
     }
     // For parent items with children, only match if on the exact path

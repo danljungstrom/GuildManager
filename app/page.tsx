@@ -1,11 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGuild } from '@/lib/contexts/GuildContext';
 import SetupWizard from '@/components/setup/SetupWizard';
 import { Loader2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Home() {
   const { config, loading } = useGuild();
@@ -24,80 +22,64 @@ export default function Home() {
     return <SetupWizard />;
   }
 
-  // Normal homepage with guild info
+  // Dashboard view
   return (
-    <main className="container mx-auto px-4 py-16">
-      <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-5xl font-bold tracking-tight text-primary">
-            {config.metadata.name}
-          </h1>
-          {(config.metadata.server || config.metadata.region || config.metadata.faction) && (
-            <p className="text-xl text-muted-foreground max-w-2xl">
-              {[config.metadata.server, config.metadata.region, config.metadata.faction].filter(Boolean).join(' - ')}
-            </p>
-          )}
-        </div>
+    <div className="container mx-auto p-6 space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-primary">Dashboard</h1>
+        <p className="text-muted-foreground mt-2">
+          Welcome to {config.metadata.name}
+        </p>
+      </div>
 
-        <Card className="w-full max-w-2xl">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
           <CardHeader>
-            <CardTitle>Welcome to GuildManager</CardTitle>
-            <CardDescription>
-              Manage your guild with a beautiful, customizable interface
-            </CardDescription>
+            <CardTitle>Guild Overview</CardTitle>
+            <CardDescription>Key statistics and metrics</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              GuildManager provides a complete solution for managing your World of Warcraft guild,
-              including roster management, raid planning, attunement tracking, and more.
-            </p>
-            <div className="flex gap-4 flex-wrap">
-              <Button asChild>
-                <Link href="/theme-demo">View Theme Demo</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/roster">View Roster</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/admin/settings">Admin Settings</Link>
-              </Button>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total Members:</span>
+                <span className="font-semibold">0</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Active Raiders:</span>
+                <span className="font-semibold">0</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Recent Activity:</span>
+                <span className="font-semibold">None</span>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Customizable Themes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Edit colors and branding through an admin interface without touching code
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Multi-Guild Support</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Support for any WoW expansion with expansion-specific features
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Modern UI</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Built with shadcn/ui and Tailwind CSS for a polished experience
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Upcoming Raids</CardTitle>
+            <CardDescription>Next scheduled events</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              No upcoming raids scheduled
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Updates</CardTitle>
+            <CardDescription>Latest guild activity</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              No recent updates
+            </p>
+          </CardContent>
+        </Card>
       </div>
-    </main>
+    </div>
   );
 }
