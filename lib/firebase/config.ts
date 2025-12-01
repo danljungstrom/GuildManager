@@ -11,21 +11,33 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-let app: FirebaseApp;
-let db: Firestore;
+let app: FirebaseApp | undefined;
+let db: Firestore | undefined;
 
-// Initialize Firebase only if environment variables are present
-if (
-  firebaseConfig.apiKey &&
-  firebaseConfig.projectId &&
-  typeof window !== 'undefined'
-) {
+// Initialize Firebase - works on both client and server
+function initializeFirebase() {
+  if (app && db) {
+    return { app, db };
+  }
+
+  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+    console.warn('Firebase config missing - apiKey or projectId not set');
+    return { app: undefined, db: undefined };
+  }
+
   if (!getApps().length) {
     app = initializeApp(firebaseConfig);
   } else {
     app = getApps()[0];
   }
   db = getFirestore(app);
+  
+  return { app, db };
 }
+
+// Initialize immediately
+const initialized = initializeFirebase();
+app = initialized.app;
+db = initialized.db;
 
 export { app, db };
