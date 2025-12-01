@@ -7,7 +7,7 @@
  * Allows changing theme colors and toggling dark mode.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -21,7 +21,7 @@ export function ThemeControls() {
   const [darkMode, setDarkMode] = useState(true);
   const [activeTheme, setActiveTheme] = useState<ThemeName>('default');
 
-  const applyThemeColors = (themeName: ThemeName, isDarkMode: boolean = darkMode) => {
+  const applyThemeColors = useCallback((themeName: ThemeName, isDarkMode: boolean = true) => {
     const themes = {
       default: mockGuildConfig,
       ...alternativeThemes,
@@ -55,7 +55,7 @@ export function ThemeControls() {
         root.style.setProperty(`--${cssKey}`, value);
       });
     }
-  };
+  }, []);
 
   // Load saved theme from localStorage on mount
   useEffect(() => {
@@ -81,7 +81,7 @@ export function ThemeControls() {
         applyThemeColors(savedTheme, true);
       }
     }
-  }, []);
+  }, [applyThemeColors]);
 
   const handleDarkModeToggle = (checked: boolean) => {
     setDarkMode(checked);

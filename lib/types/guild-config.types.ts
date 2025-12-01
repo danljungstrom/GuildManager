@@ -1,4 +1,4 @@
-import { RoleMapping, PermissionLevel } from './auth.types';
+import { RoleMapping } from './auth.types';
 
 /**
  * Guild Configuration Types
