@@ -20,6 +20,15 @@ function initializeFirebase() {
     return { app, db };
   }
 
+  // Debug: log what we have
+  if (typeof window !== 'undefined') {
+    console.log('Firebase config check:', {
+      hasApiKey: !!firebaseConfig.apiKey,
+      hasProjectId: !!firebaseConfig.projectId,
+      apiKeyPrefix: firebaseConfig.apiKey?.substring(0, 10),
+    });
+  }
+
   if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
     console.warn('Firebase config missing - apiKey or projectId not set');
     return { app: undefined, db: undefined };
