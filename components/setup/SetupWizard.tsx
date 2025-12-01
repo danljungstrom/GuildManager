@@ -9,13 +9,31 @@ import { initializeGuildConfig } from '@/lib/services/guild-config.service';
 import { getAllThemePresets } from '@/lib/constants/theme-presets';
 import { getThemeIcon } from '@/lib/constants/theme-icons';
 import { useGuild } from '@/lib/contexts/GuildContext';
+import { useAuth } from '@/lib/contexts/AdminContext';
 import { useRouter } from 'next/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
+
+// Discord icon component
+function DiscordIcon({ className }: { className?: string }) {
+  return (
+    <svg 
+      className={className} 
+      viewBox="0 0 24 24" 
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+    </svg>
+  );
+}
 
 export default function SetupWizard() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0); // Start at step 0 (auth)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { refreshConfig } = useGuild();
+  const { user, isAuthenticated, loading: authLoading, loginWithDiscord } = useAuth();
   const router = useRouter();
 
   const [guildName, setGuildName] = useState('');
@@ -24,6 +42,13 @@ export default function SetupWizard() {
   const [nameError, setNameError] = useState('');
 
   const themePresets = getAllThemePresets();
+
+  // Auto-advance to step 1 once authenticated
+  useEffect(() => {
+    if (isAuthenticated && step === 0) {
+      setStep(1);
+    }
+  }, [isAuthenticated, step]);
 
   // Apply theme preview when theme is selected
   useEffect(() => {
@@ -79,9 +104,11 @@ export default function SetupWizard() {
     setError(null);
 
     try {
+      // Include the owner's Discord ID in the config
       await initializeGuildConfig({
         name: guildName,
         themePresetId: selectedThemeId,
+        ownerId: user?.id, // Set the current user as owner
       });
 
       // Refresh the guild config context to reflect the new configuration
@@ -109,6 +136,7 @@ export default function SetupWizard() {
         <CardContent className="space-y-6">
           {/* Progress indicator */}
           <div className="flex items-center gap-2 mb-8">
+            <div className={`flex-1 h-2 rounded ${step >= 0 ? 'bg-primary' : 'bg-muted'}`} />
             <div className={`flex-1 h-2 rounded ${step >= 1 ? 'bg-primary' : 'bg-muted'}`} />
             <div className={`flex-1 h-2 rounded ${step >= 2 ? 'bg-primary' : 'bg-muted'}`} />
             <div className={`flex-1 h-2 rounded ${step >= 3 ? 'bg-primary' : 'bg-muted'}`} />
@@ -117,6 +145,64 @@ export default function SetupWizard() {
           {error && (
             <div className="p-4 bg-destructive/10 border border-destructive rounded-md text-destructive text-sm">
               {error}
+            </div>
+          )}
+
+          {/* Step 0: Discord Authentication */}
+          {step === 0 && (
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-xl font-semibold mb-2 font-heading">Sign in with Discord</h2>
+                <p className="text-sm text-muted-foreground">
+                  First, sign in with your Discord account. You&apos;ll become the site owner 
+                  with full admin access.
+                </p>
+              </div>
+
+              {authLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                </div>
+              ) : isAuthenticated && user ? (
+                <div className="flex items-center gap-4 p-4 bg-primary/10 rounded-lg">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={user.avatar} alt={user.displayName} />
+                    <AvatarFallback>{user.displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-medium">{user.displayName}</p>
+                    <p className="text-sm text-muted-foreground">@{user.discordUsername}</p>
+                  </div>
+                  <CheckCircle2 className="h-6 w-6 text-primary" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-start gap-2 p-3 bg-muted rounded-lg">
+                    <AlertCircle className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                    <div className="text-sm text-muted-foreground">
+                      Your Discord roles will determine who can access admin features.
+                      You can configure role permissions after setup.
+                    </div>
+                  </div>
+                  <Button 
+                    className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white"
+                    size="lg"
+                    onClick={loginWithDiscord}
+                  >
+                    <DiscordIcon className="mr-2 h-5 w-5" />
+                    Continue with Discord
+                  </Button>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button 
+                  onClick={() => setStep(1)} 
+                  disabled={!isAuthenticated}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           )}
 

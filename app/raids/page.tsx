@@ -11,7 +11,7 @@ export default function RaidsPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Raid Management</h1>
+        <h1 className="text-3xl font-bold text-primary">Raid Management</h1>
         <p className="text-muted-foreground mt-2">
           Schedule and track guild raids, attendance, and loot
         </p>

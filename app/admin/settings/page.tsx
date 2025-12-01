@@ -1,22 +1,6 @@
 'use client';
 
-// TODO: Add Firebase Authentication to protect this admin route
-// This page should only be accessible to authenticated admin users
-// Steps to implement:
-// 1. Set up Firebase Authentication (see Firebase console)
-// 2. Create an authentication context/hook
-// 3. Add a useEffect to check if user is authenticated and is an admin
-// 4. Redirect to login page if not authenticated
-// 5. Show "Unauthorized" message if authenticated but not an admin
-// Example implementation:
-// const { user, loading } = useAuth();
-// useEffect(() => {
-//   if (!loading && (!user || !user.isAdmin)) {
-//     router.push('/login');
-//   }
-// }, [user, loading, router]);
-
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useGuild } from '@/lib/contexts/GuildContext';
 import { updateGuildConfig } from '@/lib/services/guild-config.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,34 +8,178 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
-import { WoWExpansion, WoWRegion, WoWFaction } from '@/lib/types/guild-config.types';
-import { ArrowLeft } from 'lucide-react';
+import { WoWExpansion } from '@/lib/types/guild-config.types';
 import { GuildLogo } from '@/components/ui/guild-logo';
-import Link from 'next/link';
+import { useThemeStore } from '@/lib/stores/theme-store';
+import { getAllThemePresets, getThemePreset, ThemePreset } from '@/lib/constants/theme-presets';
+import { getThemeIcon } from '@/lib/constants/theme-icons';
+import { Check, RotateCcw } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+// Helper functions to convert between HSL and Hex
+function hslToHex(hsl: string): string {
+  try {
+    const parts = hsl.trim().split(/\s+/);
+    if (parts.length < 3) return '#888888';
+    
+    const h = parseFloat(parts[0]) / 360;
+    const s = parseFloat(parts[1].replace('%', '')) / 100;
+    const l = parseFloat(parts[2].replace('%', '')) / 100;
+
+    const hue2rgb = (p: number, q: number, t: number) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+
+    let r, g, b;
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
+    }
+
+    const toHex = (x: number) => {
+      const hex = Math.round(x * 255).toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    };
+
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  } catch {
+    return '#888888';
+  }
+}
+
+function hexToHsl(hex: string): string {
+  try {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (!result) return '0 0% 50%';
+
+    const r = parseInt(result[1], 16) / 255;
+    const g = parseInt(result[2], 16) / 255;
+    const b = parseInt(result[3], 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+
+    return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+  } catch {
+    return '0 0% 50%';
+  }
+}
 
 export default function AdminSettingsPage() {
   const { config, refreshConfig } = useGuild();
+  const { activePresetId, applyPreset } = useThemeStore();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const themePresets = getAllThemePresets();
+  const currentPreset = getThemePreset(activePresetId);
+  const isDark = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
+
+  // Custom color override (not persisted to preset)
+  const [customPrimaryColor, setCustomPrimaryColor] = useState('');
+
+  // Reset custom color when preset changes
+  useEffect(() => {
+    if (currentPreset) {
+      const colors = isDark ? currentPreset.colors.dark : currentPreset.colors.light;
+      setCustomPrimaryColor(colors.primary);
+    }
+  }, [activePresetId, currentPreset, isDark]);
+
   const [formData, setFormData] = useState({
     name: config?.metadata.name || '',
     server: config?.metadata.server || '',
-    region: (config?.metadata.region || 'US') as WoWRegion,
-    faction: (config?.metadata.faction || 'Alliance') as WoWFaction,
     expansion: (config?.metadata.expansion || 'classic') as WoWExpansion,
-    description: config?.metadata.description || '',
-    primaryColor: config?.theme.colors.primary || '41 40% 60%',
-    accentColor: config?.theme.colors.accent || '41 40% 60%',
     enableRaidPlanning: config?.features?.enableRaidPlanning ?? true,
     enableAttunementTracking: config?.features?.enableAttunementTracking ?? true,
     enableProfessionTracking: config?.features?.enableProfessionTracking ?? true,
     enablePublicRoster: config?.features?.enablePublicRoster ?? true,
   });
+
+  // Handle applying a theme preset
+  const handleApplyPreset = useCallback(async (preset: ThemePreset) => {
+    applyPreset(preset);
+
+    // If the guild is using a theme icon (not a custom image), persist to Firestore
+    if (config && config.theme.logoType !== 'custom-image') {
+      try {
+        await updateGuildConfig({
+          theme: {
+            ...config.theme,
+            logo: preset.id,
+            logoType: 'theme-icon',
+          },
+        });
+      } catch (error) {
+        console.error('Failed to update guild logo:', error);
+      }
+    }
+  }, [applyPreset, config]);
+
+  // Apply custom color (live preview only)
+  const handleCustomColorChange = (value: string) => {
+    setCustomPrimaryColor(value);
+    // Apply immediately as CSS variable for preview
+    document.documentElement.style.setProperty('--primary', value);
+  };
+
+  // Handle color picker change (converts hex to HSL)
+  const handleColorPickerChange = (hexValue: string) => {
+    const hslValue = hexToHsl(hexValue);
+    handleCustomColorChange(hslValue);
+  };
+
+  // Reset colors to preset defaults
+  const handleResetColors = () => {
+    if (currentPreset) {
+      const colors = isDark ? currentPreset.colors.dark : currentPreset.colors.light;
+      setCustomPrimaryColor(colors.primary);
+      document.documentElement.style.setProperty('--primary', colors.primary);
+    }
+  };
+
+  // Cancel all changes and reset to saved values
+  const handleCancelChanges = () => {
+    // Reset form data to config values
+    setFormData({
+      name: config?.metadata.name || '',
+      server: config?.metadata.server || '',
+      expansion: (config?.metadata.expansion || 'classic') as WoWExpansion,
+      enableRaidPlanning: config?.features?.enableRaidPlanning ?? true,
+      enableAttunementTracking: config?.features?.enableAttunementTracking ?? true,
+      enableProfessionTracking: config?.features?.enableProfessionTracking ?? true,
+      enablePublicRoster: config?.features?.enablePublicRoster ?? true,
+    });
+    // Reset colors to preset
+    handleResetColors();
+    setError(null);
+    setSuccess(false);
+  };
 
   const handleSave = async () => {
     if (!config) return;
@@ -65,16 +193,12 @@ export default function AdminSettingsPage() {
         metadata: {
           name: formData.name,
           server: formData.server,
-          region: formData.region as WoWRegion,
-          faction: formData.faction as WoWFaction,
           expansion: formData.expansion as WoWExpansion,
-          description: formData.description,
         },
         theme: {
           colors: {
             ...config.theme.colors,
-            primary: formData.primaryColor,
-            accent: formData.accentColor,
+            primary: customPrimaryColor,
           },
         },
         features: {
@@ -105,42 +229,28 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
-          <Link href="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold">Admin Settings</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your guild&apos;s configuration and appearance
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Settings</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your account and guild configuration
           </p>
         </div>
 
-        {success && (
-          <div className="mb-4 p-4 bg-green-500/10 border border-green-500 rounded-md text-green-500">
-            Settings saved successfully!
-          </div>
-        )}
-
-        {error && (
-          <div className="mb-4 p-4 bg-destructive/10 border border-destructive rounded-md text-destructive">
-            {error}
-          </div>
-        )}
-
-        <Tabs defaultValue="general" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="theme">Theme</TabsTrigger>
-            <TabsTrigger value="branding">Logo & Branding</TabsTrigger>
-            <TabsTrigger value="features">Features</TabsTrigger>
+        <Tabs defaultValue="user" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="user">User Settings</TabsTrigger>
+            <TabsTrigger value="admin">Admin Settings</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="admin" className="space-y-4">
+            <Tabs defaultValue="general" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="general">General</TabsTrigger>
+                <TabsTrigger value="theme">Theme</TabsTrigger>
+                <TabsTrigger value="branding">Logo & Branding</TabsTrigger>
+                <TabsTrigger value="features">Features</TabsTrigger>
+              </TabsList>
 
           <TabsContent value="general">
             <Card>
@@ -161,124 +271,126 @@ export default function AdminSettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="server">Server Name</Label>
-                  <Input
-                    id="server"
-                    value={formData.server}
-                    onChange={(e) => setFormData({ ...formData, server: e.target.value })}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="region">Region</Label>
-                    <Select value={formData.region} onValueChange={(value) => setFormData({ ...formData, region: value as WoWRegion })}>
-                      <SelectTrigger id="region">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="US">US</SelectItem>
-                        <SelectItem value="EU">EU</SelectItem>
-                        <SelectItem value="KR">KR</SelectItem>
-                        <SelectItem value="TW">TW</SelectItem>
-                        <SelectItem value="CN">CN</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="faction">Faction</Label>
-                    <Select value={formData.faction} onValueChange={(value) => setFormData({ ...formData, faction: value as WoWFaction })}>
-                      <SelectTrigger id="faction">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Alliance">Alliance</SelectItem>
-                        <SelectItem value="Horde">Horde</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="expansion">Expansion</Label>
                   <Select value={formData.expansion} onValueChange={(value) => setFormData({ ...formData, expansion: value as WoWExpansion })}>
                     <SelectTrigger id="expansion">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="classic">Classic Era</SelectItem>
+                      <SelectItem value="classic">Classic</SelectItem>
                       <SelectItem value="tbc">The Burning Crusade</SelectItem>
                       <SelectItem value="wotlk">Wrath of the Lich King</SelectItem>
-                      <SelectItem value="cata">Cataclysm</SelectItem>
-                      <SelectItem value="retail">Retail</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={6}
-                  />
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="theme">
-            <Card>
-              <CardHeader>
-                <CardTitle>Theme Colors</CardTitle>
-                <CardDescription>
-                  Customize your guild&apos;s color scheme
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="primaryColor">Primary Color (HSL)</Label>
-                  <Input
-                    id="primaryColor"
-                    value={formData.primaryColor}
-                    onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                    placeholder="41 40% 60%"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Format: hue saturation% lightness% (e.g., &quot;41 40% 60%&quot;)
-                  </p>
-                </div>
+            <div className="space-y-4">
+              {/* Theme Presets */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle>Theme Preset</CardTitle>
+                  <CardDescription>
+                    Choose a preset theme for your guild
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
+                    {themePresets.map((preset) => {
+                      const themeIcon = getThemeIcon(preset.id);
+                      const presetColors = isDark ? preset.colors.dark : preset.colors.light;
+                      const isActive = activePresetId === preset.id;
 
-                <div className="space-y-2">
-                  <Label htmlFor="accentColor">Accent Color (HSL)</Label>
-                  <Input
-                    id="accentColor"
-                    value={formData.accentColor}
-                    onChange={(e) => setFormData({ ...formData, accentColor: e.target.value })}
-                    placeholder="41 40% 60%"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Format: hue saturation% lightness% (e.g., &quot;41 40% 60%&quot;)
-                  </p>
-                </div>
-
-                <div className="p-4 border rounded-md space-y-2">
-                  <p className="text-sm font-medium">Preview</p>
-                  <div className="flex gap-4">
-                    <div
-                      className="h-20 w-20 rounded-md border"
-                      style={{ backgroundColor: `hsl(${formData.primaryColor})` }}
-                    />
-                    <div
-                      className="h-20 w-20 rounded-md border"
-                      style={{ backgroundColor: `hsl(${formData.accentColor})` }}
-                    />
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => handleApplyPreset(preset)}
+                          className={cn(
+                            'relative flex items-center gap-3 p-3 rounded-lg border text-left transition-all hover:bg-muted/50',
+                            isActive && 'ring-2 ring-primary bg-muted/30'
+                          )}
+                        >
+                          {themeIcon && (
+                            <div
+                              className="w-8 h-8 flex-shrink-0"
+                              style={{
+                                backgroundColor: `hsl(${presetColors.primary})`,
+                                WebkitMask: `url(${themeIcon.svg}) center/contain no-repeat`,
+                                mask: `url(${themeIcon.svg}) center/contain no-repeat`
+                              }}
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{preset.name}</p>
+                          </div>
+                          {isActive && (
+                            <div className="absolute top-1 right-1 rounded-full bg-primary p-0.5">
+                              <Check className="h-3 w-3 text-primary-foreground" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              {/* Custom Color Overrides */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Custom Colors</CardTitle>
+                      <CardDescription>
+                        Fine-tune colors based on your selected preset
+                      </CardDescription>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleResetColors}
+                      className="text-muted-foreground"
+                    >
+                      <RotateCcw className="h-4 w-4 mr-1" />
+                      Reset
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="primaryColor">Primary Color</Label>
+                    <div className="flex gap-2 max-w-sm">
+                      <label className="relative w-12 h-10 rounded-md border cursor-pointer overflow-hidden flex-shrink-0">
+                        <input
+                          type="color"
+                          value={hslToHex(customPrimaryColor)}
+                          onChange={(e) => handleColorPickerChange(e.target.value)}
+                          className="absolute inset-0 w-full h-full cursor-pointer opacity-0"
+                        />
+                        <div
+                          className="w-full h-full"
+                          style={{ backgroundColor: `hsl(${customPrimaryColor})` }}
+                        />
+                      </label>
+                      <Input
+                        id="primaryColor"
+                        value={customPrimaryColor}
+                        onChange={(e) => handleCustomColorChange(e.target.value)}
+                        placeholder="41 40% 60%"
+                        className="font-mono text-sm"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Click the color swatch to open the picker. This is used for buttons, links, and accents throughout the site.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="branding">
@@ -445,11 +557,42 @@ export default function AdminSettingsPage() {
           </TabsContent>
         </Tabs>
 
-        <div className="mt-8 flex justify-end">
-          <Button onClick={handleSave} disabled={loading} size="lg">
-            {loading ? 'Saving...' : 'Save Changes'}
-          </Button>
-        </div>
+            <div className="sticky bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 mt-4 flex justify-between items-center">
+              <div className="flex-1">
+                {success && (
+                  <span className="text-sm text-green-500">Settings saved successfully!</span>
+                )}
+                {error && (
+                  <span className="text-sm text-destructive">{error}</span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={handleCancelChanges} disabled={loading}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSave} disabled={loading}>
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="user" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Preferences</CardTitle>
+                <CardDescription>
+                  Personal settings and preferences
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  User settings coming soon...
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ export default function RosterByClassPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Roster by Class & Role</h1>
+        <h1 className="text-3xl font-bold text-primary">Roster by Class & Role</h1>
         <p className="text-muted-foreground mt-2">
           View guild members organized by their class and role
         </p>

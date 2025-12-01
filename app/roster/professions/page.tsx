@@ -16,7 +16,7 @@ export default function RosterProfessionsPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Guild Professions</h1>
+        <h1 className="text-3xl font-bold text-primary">Guild Professions</h1>
         <p className="text-muted-foreground mt-2">
           Track guild member professions and their skill levels
         </p>

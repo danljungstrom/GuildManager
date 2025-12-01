@@ -32,6 +32,7 @@
     "@radix-ui/react-toast": "^1.2.4",
     "@radix-ui/react-toggle": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
+    "@vercel/speed-insights": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -39,6 +40,7 @@
     "firebase-admin": "^13.4.0",
     "lucide-react": "^0.469.0",
     "next": "15.3.5",
+    "next-themes": "^0.4.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^2.6.0",
@@ -60,5 +62,5 @@
     "typescript": "^5",
     "vitest": "^3.2.4"
   },
-  "packageManager": "pnpm@10.13.1"
+  "packageManager": "pnpm@10.24.0"
 }

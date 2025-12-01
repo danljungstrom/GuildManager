@@ -47,7 +47,7 @@ export function ProfessionIcon({
             src={icon}
             alt={profession}
             fill
-            className="object-cover"
+            className="object-cover scale-110"
             sizes={size === 'sm' ? '24px' : size === 'md' ? '32px' : '48px'}
           />
         ) : (

@@ -6,28 +6,54 @@
  * Pre-built theme color schemes that can be applied with one click.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { ComponentDemoLayout, DemoSection } from '../../_components/component-demo-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getAllThemePresets } from '@/lib/constants/theme-presets';
+import { getAllThemePresets, ThemePreset } from '@/lib/constants/theme-presets';
 import { getThemeIcon } from '@/lib/constants/theme-icons';
 import { useThemeStore } from '@/lib/stores/theme-store';
+import { useGuild } from '@/lib/contexts/GuildContext';
+import { updateGuildConfig } from '@/lib/services/guild-config.service';
 
 const themePresets = getAllThemePresets();
 
 export default function ThemePresetsPage() {
   const { activePresetId, applyPreset } = useThemeStore();
+  const { config } = useGuild();
+
+  // Handle applying a theme preset and updating guild logo if using theme icons
+  const handleApplyPreset = useCallback(async (preset: ThemePreset) => {
+    // Apply the theme CSS variables - this also updates Zustand store
+    // which the GuildLogo component listens to for immediate updates
+    applyPreset(preset);
+
+    // If the guild is using a theme icon (not a custom image), persist to Firestore
+    // Note: GuildLogo updates immediately from Zustand, this is just for persistence
+    if (config && config.theme.logoType !== 'custom-image') {
+      try {
+        await updateGuildConfig({
+          theme: {
+            ...config.theme,
+            logo: preset.id,
+            logoType: 'theme-icon',
+          },
+        });
+      } catch (error) {
+        console.error('Failed to update guild logo:', error);
+      }
+    }
+  }, [applyPreset, config]);
 
   useEffect(() => {
     // Listen for theme changes and reapply active preset
     const handleThemeChange = () => {
       const currentPreset = themePresets.find(p => p.id === activePresetId);
       if (currentPreset) {
-        // Reapply preset colors after theme switch
+        // Reapply preset colors after theme switch (just CSS, not guild config)
         applyPreset(currentPreset);
       }
     };
@@ -60,7 +86,7 @@ export default function ThemePresetsPage() {
                   'cursor-pointer transition-all hover:shadow-lg',
                   activePresetId === preset.id && 'ring-2 ring-primary'
                 )}
-                onClick={() => applyPreset(preset)}
+                onClick={() => handleApplyPreset(preset)}
               >
                 <CardHeader>
                   <div className="flex items-center gap-3">
@@ -102,7 +128,7 @@ export default function ThemePresetsPage() {
                     className="w-full"
                     onClick={(e) => {
                       e.stopPropagation();
-                      applyPreset(preset);
+                      handleApplyPreset(preset);
                     }}
                   >
                     {activePresetId === preset.id ? 'Active Theme' : 'Apply Theme'}

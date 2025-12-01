@@ -172,6 +172,65 @@
   }
 }
 
+/* Sidebar polish and enhancements */
+@layer components {
+  /* Smooth hover transitions for sidebar items */
+  [data-sidebar="menu-button"],
+  [data-sidebar="menu-sub-button"] {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Enhanced focus states with primary color */
+  [data-sidebar="menu-button"]:focus-visible,
+  [data-sidebar="menu-sub-button"]:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  /* Subtle shadow for header and footer gradients */
+  [data-sidebar="header"] {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  [data-sidebar="footer"] {
+    box-shadow: 0 -1px 3px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  /* Enhanced sidebar background with subtle texture */
+  [data-sidebar="sidebar"] {
+    background: linear-gradient(to bottom,
+      hsl(var(--sidebar-background)) 0%,
+      hsl(var(--sidebar-background)) 100%
+    );
+  }
+
+  /* Improved hover state for non-active items */
+  [data-sidebar="menu-button"]:not([data-active="true"]):hover,
+  [data-sidebar="menu-sub-button"]:not([data-active="true"]):hover {
+    background: linear-gradient(to right,
+      hsl(var(--primary) / 0.05),
+      hsl(var(--primary) / 0.02)
+    );
+  }
+
+  /* Active state enhancements */
+  [data-sidebar="menu-button"][data-active="true"],
+  [data-sidebar="menu-sub-button"][data-active="true"] {
+    position: relative;
+    background: linear-gradient(to right,
+      hsl(var(--primary) / 0.15),
+      hsl(var(--primary) / 0.08)
+    );
+    box-shadow: inset 0 1px 2px 0 hsl(var(--primary) / 0.1);
+  }
+
+  /* Collapsed sidebar icon state */
+  .group-data-[collapsible=icon] [data-sidebar="menu-button"][data-active="true"] {
+    background: hsl(var(--primary) / 0.15);
+    border: 1px solid hsl(var(--primary) / 0.3);
+  }
+}
+
 /* Custom utility classes for WoW-specific styling */
 @layer utilities {
   .class-druid {

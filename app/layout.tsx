@@ -5,8 +5,8 @@ import { Geist, Geist_Mono, Inter, Cinzel_Decorative, Metal_Mania, New_Rocker, A
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { GuildProvider } from '@/lib/contexts/GuildContext';
-import { AppSidebar } from '@/components/layout/AppSidebar';
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { AdminProvider } from '@/lib/contexts/AdminContext';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 const geist = Geist({
   subsets: ['latin'],
@@ -92,22 +92,13 @@ export default function RootLayout({
       geist.variable,
       geistMono.variable
     )}>
-      <body className={cn('min-h-screen bg-background antialiased')}>
+      <body className={cn('min-h-screen antialiased')}>
         <GuildProvider>
-          <SidebarProvider defaultOpen={true}>
-            <AppSidebar />
-            <SidebarInset>
-              <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border px-4 md:hidden">
-                <SidebarTrigger className="md:hidden" />
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <h1 className="text-lg font-semibold truncate">Guild Manager</h1>
-                </div>
-              </header>
-              <main className="flex-1">
-                {children}
-              </main>
-            </SidebarInset>
-          </SidebarProvider>
+          <AdminProvider>
+            <AppLayout>
+              {children}
+            </AppLayout>
+          </AdminProvider>
         </GuildProvider>
       </body>
     </html>
