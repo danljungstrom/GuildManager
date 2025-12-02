@@ -15,8 +15,11 @@ import { GuildLogo } from '@/components/ui/guild-logo';
 import { useThemeStore } from '@/lib/stores/theme-store';
 import { getAllThemePresets, getThemePreset, ThemePreset } from '@/lib/constants/theme-presets';
 import { getThemeIcon } from '@/lib/constants/theme-icons';
-import { Check, RotateCcw } from 'lucide-react';
+import { Check, RotateCcw, Database, Trash2, Users, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getMockRosterMembers } from '@/lib/mock/roster-data';
+import { populateRosterWithMockData, clearAllRosterMembers, getAllRosterMembers } from '@/lib/firebase/roster';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Helper functions to convert between HSL and Hex
 function hslToHex(hsl: string): string {
@@ -96,6 +99,12 @@ export default function AdminSettingsPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Mock data generator state
+  const [rosterCount, setRosterCount] = useState(0);
+  const [mockDataLoading, setMockDataLoading] = useState(false);
+  const [mockDataSuccess, setMockDataSuccess] = useState<string | null>(null);
+  const [mockDataError, setMockDataError] = useState<string | null>(null);
+
   const themePresets = getAllThemePresets();
   const currentPreset = getThemePreset(activePresetId);
   const isDark = typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
@@ -110,6 +119,71 @@ export default function AdminSettingsPage() {
       setCustomPrimaryColor(colors.primary);
     }
   }, [activePresetId, currentPreset, isDark]);
+
+  // Load roster count on mount
+  useEffect(() => {
+    loadRosterCount();
+  }, []);
+
+  const loadRosterCount = async () => {
+    try {
+      const members = await getAllRosterMembers();
+      setRosterCount(members.length);
+    } catch (err) {
+      console.error('Error loading roster count:', err);
+    }
+  };
+
+  const handlePopulateMockData = async () => {
+    setMockDataLoading(true);
+    setMockDataSuccess(null);
+    setMockDataError(null);
+
+    try {
+      const mockMembers = await getMockRosterMembers();
+      const count = await populateRosterWithMockData(mockMembers);
+
+      setMockDataSuccess(`Successfully added ${count} mock members to the roster!`);
+      await loadRosterCount();
+
+      setTimeout(() => setMockDataSuccess(null), 5000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to populate mock data';
+
+      // Check if it's a Firebase permission error
+      if (errorMessage.includes('permission') || errorMessage.includes('insufficient')) {
+        setMockDataError('Firebase permission denied. Please configure Firestore security rules to allow writes. See console for details.');
+        console.error('Firebase Security Rules needed. Add this to your Firestore rules:\n\nrules_version = \'2\';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /roster/{document=**} {\n      allow read, write: if true; // Development only - replace with proper auth\n    }\n  }\n}');
+      } else {
+        setMockDataError(errorMessage);
+      }
+    } finally {
+      setMockDataLoading(false);
+    }
+  };
+
+  const handleClearRoster = async () => {
+    if (!confirm('Are you sure you want to delete ALL roster members? This action cannot be undone!')) {
+      return;
+    }
+
+    setMockDataLoading(true);
+    setMockDataSuccess(null);
+    setMockDataError(null);
+
+    try {
+      const count = await clearAllRosterMembers();
+
+      setMockDataSuccess(`Successfully deleted ${count} roster members.`);
+      await loadRosterCount();
+
+      setTimeout(() => setMockDataSuccess(null), 5000);
+    } catch (err) {
+      setMockDataError(err instanceof Error ? err.message : 'Failed to clear roster');
+    } finally {
+      setMockDataLoading(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     name: config?.metadata.name || '',
@@ -250,6 +324,7 @@ export default function AdminSettingsPage() {
                 <TabsTrigger value="theme">Theme</TabsTrigger>
                 <TabsTrigger value="branding">Logo & Branding</TabsTrigger>
                 <TabsTrigger value="features">Features</TabsTrigger>
+                <TabsTrigger value="development">Development</TabsTrigger>
               </TabsList>
 
           <TabsContent value="general">
@@ -554,6 +629,125 @@ export default function AdminSettingsPage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="development">
+            <div className="space-y-4">
+              {/* Warning Banner */}
+              <Alert className="border-yellow-500/50 bg-yellow-500/10">
+                <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+                  <strong>Development Tools:</strong> These tools are for testing and development purposes only. Use with caution in production environments.
+                </AlertDescription>
+              </Alert>
+
+              {/* Firebase Setup Instructions */}
+              <Alert className="border-blue-500/50 bg-blue-500/10">
+                <Database className="h-4 w-4 text-blue-500" />
+                <AlertDescription className="text-blue-700 dark:text-blue-300">
+                  <strong>Firebase Setup Required:</strong> To use the mock data generator, configure your Firestore security rules to allow writes.
+                  Go to <strong>Firebase Console → Firestore Database → Rules</strong> and add permissions for the <code className="px-1 py-0.5 bg-blue-500/20 rounded">roster</code> collection.
+                </AlertDescription>
+              </Alert>
+
+              {/* Roster Mock Data Generator */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Database className="h-5 w-5" />
+                    Roster Mock Data Generator
+                  </CardTitle>
+                  <CardDescription>
+                    Quickly populate your roster with realistic mock data for testing
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+                    <div className="flex items-center gap-3">
+                      <Users className="h-8 w-8 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">Current Roster Size</p>
+                        <p className="text-2xl font-bold text-primary">{rosterCount} members</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={loadRosterCount}
+                      disabled={mockDataLoading}
+                    >
+                      Refresh
+                    </Button>
+                  </div>
+
+                  {mockDataSuccess && (
+                    <Alert className="border-green-500/50 bg-green-500/10">
+                      <Check className="h-4 w-4 text-green-500" />
+                      <AlertDescription className="text-green-700 dark:text-green-300">
+                        {mockDataSuccess}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {mockDataError && (
+                    <Alert className="border-destructive/50 bg-destructive/10">
+                      <AlertTriangle className="h-4 w-4 text-destructive" />
+                      <AlertDescription className="text-destructive">
+                        {mockDataError}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  <div className="space-y-3 pt-2">
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">Generate Mock Data</h4>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        This will add 15 realistic guild members with diverse classes, specs, roles, and attendance data. Perfect for testing filtering, sorting, and UI layouts.
+                      </p>
+                      <Button
+                        onClick={handlePopulateMockData}
+                        disabled={mockDataLoading}
+                        className="w-full sm:w-auto"
+                      >
+                        <Database className="h-4 w-4 mr-2" />
+                        {mockDataLoading ? 'Adding Mock Data...' : 'Add 15 Mock Members'}
+                      </Button>
+                    </div>
+
+                    <div className="pt-4 border-t">
+                      <h4 className="text-sm font-semibold mb-2 flex items-center gap-2 text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                        Danger Zone
+                      </h4>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Clear all roster members from the database. This action cannot be undone!
+                      </p>
+                      <Button
+                        variant="destructive"
+                        onClick={handleClearRoster}
+                        disabled={mockDataLoading || rosterCount === 0}
+                        className="w-full sm:w-auto"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {mockDataLoading ? 'Clearing...' : 'Clear All Roster Data'}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <h4 className="text-sm font-semibold mb-2">Mock Data Details</h4>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p>• 15 members across all 9 WoW classes</p>
+                      <p>• Varied ranks: GM, Officers, Core Raiders, Trials, Social</p>
+                      <p>• Realistic specs, gear scores (395-485), and levels (58-60)</p>
+                      <p>• Attendance tracking (20%-100%)</p>
+                      <p>• Professions, attunements, and extra roles</p>
+                      <p>• Unique character names and player names</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
 

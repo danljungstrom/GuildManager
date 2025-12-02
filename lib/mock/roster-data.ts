@@ -1,0 +1,550 @@
+/**
+ * Mock Roster Data
+ *
+ * Sample roster data for development and testing.
+ * Includes diverse guild members with varied attributes for UI testing.
+ */
+
+import type { RosterMember } from '@/lib/types/roster.types';
+import { initializeAttunements } from '@/lib/types/roster.types';
+
+/**
+ * Generate mock roster members with realistic data
+ */
+export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
+  {
+    id: '1',
+    name: 'Thorgar',
+    playerName: 'Mike',
+    rank: 'GM',
+    class: 'Warrior',
+    spec: 'Protection',
+    offSpec: 'Arms',
+    role: 'Tank',
+    level: 60,
+    gearInfo: {
+      gearScore: 485,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: true,
+      aq20: true,
+      aq40: true,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Blacksmithing', skill: 300 },
+      { profession: 'Mining', skill: 300 },
+    ],
+    attendance: {
+      percentage: 95,
+      totalRaids: 40,
+      attendedRaids: 38,
+      lastRaid: '2024-11-30',
+    },
+    extraRoles: ['Raid Leader', 'Main Tank'],
+    joinDate: '2024-01-15',
+    notes: 'Guild Master and main tank. Excellent leader.',
+    createdAt: '2024-01-15T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '2',
+    name: 'Healara',
+    playerName: 'Sarah',
+    rank: 'Officer',
+    class: 'Priest',
+    spec: 'Holy',
+    offSpec: 'Discipline',
+    role: 'Healer',
+    level: 60,
+    gearInfo: {
+      gearScore: 470,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: true,
+      aq20: true,
+      aq40: true,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Tailoring', skill: 300 },
+      { profession: 'Enchanting', skill: 300 },
+    ],
+    attendance: {
+      percentage: 92,
+      totalRaids: 40,
+      attendedRaids: 37,
+      lastRaid: '2024-11-30',
+    },
+    extraRoles: ['Class Leader', 'Enchanter'],
+    joinDate: '2024-01-20',
+    notes: 'Raid healer officer. Great at coordinating healing assignments.',
+    createdAt: '2024-01-20T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '3',
+    name: 'Firemage',
+    rank: 'Core',
+    class: 'Mage',
+    spec: 'Fire',
+    role: 'DPS',
+    level: 60,
+    gearInfo: {
+      gearScore: 455,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: true,
+      aq20: true,
+      aq40: false,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Tailoring', skill: 300 },
+      { profession: 'Alchemy', skill: 275 },
+    ],
+    attendance: {
+      percentage: 88,
+      totalRaids: 35,
+      attendedRaids: 31,
+      lastRaid: '2024-11-30',
+    },
+    joinDate: '2024-02-10',
+    createdAt: '2024-02-10T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '4',
+    name: 'Beardruid',
+    playerName: 'Tom',
+    rank: 'Core',
+    class: 'Druid',
+    spec: 'Feral',
+    offSpec: 'Restoration',
+    role: 'Tank',
+    level: 60,
+    gearInfo: {
+      gearScore: 465,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: true,
+      aq20: true,
+      aq40: true,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Herbalism', skill: 300 },
+      { profession: 'Alchemy', skill: 300 },
+    ],
+    attendance: {
+      percentage: 90,
+      totalRaids: 38,
+      attendedRaids: 34,
+      lastRaid: '2024-11-30',
+    },
+    extraRoles: ['Main Tank'],
+    joinDate: '2024-01-25',
+    notes: 'Off-tank. Can also heal if needed.',
+    createdAt: '2024-01-25T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '5',
+    name: 'Shadowstab',
+    rank: 'Core',
+    class: 'Rogue',
+    spec: 'Combat',
+    offSpec: 'Assassination',
+    role: 'DPS',
+    level: 60,
+    gearInfo: {
+      gearScore: 478,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: true,
+      aq20: true,
+      aq40: true,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Engineering', skill: 300 },
+      { profession: 'Mining', skill: 300 },
+    ],
+    attendance: {
+      percentage: 96,
+      totalRaids: 40,
+      attendedRaids: 38,
+      lastRaid: '2024-11-30',
+    },
+    joinDate: '2024-02-01',
+    notes: 'Consistently high DPS. Always prepared.',
+    createdAt: '2024-02-01T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '6',
+    name: 'Holypal',
+    rank: 'Core',
+    class: 'Paladin',
+    spec: 'Holy',
+    role: 'Healer',
+    level: 60,
+    gearInfo: {
+      gearScore: 450,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: true,
+      aq20: true,
+      aq40: false,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Mining', skill: 300 },
+      { profession: 'Engineering', skill: 275 },
+    ],
+    attendance: {
+      percentage: 85,
+      totalRaids: 33,
+      attendedRaids: 28,
+      lastRaid: '2024-11-28',
+    },
+    joinDate: '2024-03-05',
+    createdAt: '2024-03-05T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '7',
+    name: 'Huntmaster',
+    rank: 'Core',
+    class: 'Hunter',
+    spec: 'Beast Mastery',
+    role: 'DPS',
+    level: 60,
+    gearInfo: {
+      gearScore: 460,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: true,
+      aq20: true,
+      aq40: true,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Leatherworking', skill: 300 },
+      { profession: 'Skinning', skill: 300 },
+    ],
+    attendance: {
+      percentage: 87,
+      totalRaids: 35,
+      attendedRaids: 30,
+      lastRaid: '2024-11-30',
+    },
+    joinDate: '2024-02-15',
+    createdAt: '2024-02-15T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '8',
+    name: 'Warlockdots',
+    rank: 'Core',
+    class: 'Warlock',
+    spec: 'Affliction',
+    role: 'DPS',
+    level: 60,
+    gearInfo: {
+      gearScore: 472,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: true,
+      aq20: true,
+      aq40: true,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Tailoring', skill: 300 },
+      { profession: 'Herbalism', skill: 250 },
+    ],
+    attendance: {
+      percentage: 91,
+      totalRaids: 38,
+      attendedRaids: 35,
+      lastRaid: '2024-11-30',
+    },
+    joinDate: '2024-02-20',
+    createdAt: '2024-02-20T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '9',
+    name: 'Shamanheals',
+    playerName: 'Alex',
+    rank: 'Core',
+    class: 'Shaman',
+    spec: 'Restoration',
+    offSpec: 'Enhancement',
+    role: 'Healer',
+    level: 60,
+    gearInfo: {
+      gearScore: 448,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: true,
+      aq20: true,
+      aq40: false,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Alchemy', skill: 300 },
+      { profession: 'Herbalism', skill: 300 },
+    ],
+    attendance: {
+      percentage: 83,
+      totalRaids: 30,
+      attendedRaids: 25,
+      lastRaid: '2024-11-30',
+    },
+    joinDate: '2024-03-10',
+    createdAt: '2024-03-10T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '10',
+    name: 'Frostmage',
+    rank: 'Trial',
+    class: 'Mage',
+    spec: 'Frost',
+    role: 'DPS',
+    level: 60,
+    gearInfo: {
+      gearScore: 425,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: false,
+      aq20: false,
+      aq40: false,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Engineering', skill: 250 },
+      { profession: 'Mining', skill: 225 },
+    ],
+    attendance: {
+      percentage: 75,
+      totalRaids: 12,
+      attendedRaids: 9,
+      lastRaid: '2024-11-30',
+    },
+    joinDate: '2024-10-01',
+    notes: 'New trial. Showing good potential.',
+    createdAt: '2024-10-01T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '11',
+    name: 'Warriordps',
+    rank: 'Trial',
+    class: 'Warrior',
+    spec: 'Fury',
+    role: 'DPS',
+    level: 59,
+    gearInfo: {
+      gearScore: 410,
+    },
+    attunements: {
+      mc: true,
+      onyxia: false,
+      bwl: false,
+      aq20: false,
+      aq40: false,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Mining', skill: 275 },
+      { profession: 'Engineering', skill: 200 },
+    ],
+    attendance: {
+      percentage: 80,
+      totalRaids: 10,
+      attendedRaids: 8,
+      lastRaid: '2024-11-28',
+    },
+    joinDate: '2024-10-15',
+    notes: 'Trial warrior. Needs more gear but good attitude.',
+    createdAt: '2024-10-15T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '12',
+    name: 'Shadowpriest',
+    rank: 'Social',
+    class: 'Priest',
+    spec: 'Shadow',
+    role: 'DPS',
+    level: 60,
+    gearInfo: {
+      gearScore: 440,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: true,
+      aq20: false,
+      aq40: false,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Tailoring', skill: 300 },
+      { profession: 'Enchanting', skill: 275 },
+    ],
+    attendance: {
+      percentage: 45,
+      totalRaids: 20,
+      attendedRaids: 9,
+      lastRaid: '2024-11-15',
+    },
+    joinDate: '2024-05-01',
+    notes: 'Social member. Occasional raider.',
+    createdAt: '2024-05-01T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '13',
+    name: 'Retpaladin',
+    rank: 'Social',
+    class: 'Paladin',
+    spec: 'Retribution',
+    role: 'DPS',
+    level: 58,
+    gearInfo: {
+      gearScore: 395,
+    },
+    attunements: {
+      mc: false,
+      onyxia: false,
+      bwl: false,
+      aq20: false,
+      aq40: false,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Blacksmithing', skill: 200 },
+      { profession: 'Mining', skill: 250 },
+    ],
+    attendance: {
+      percentage: 20,
+      totalRaids: 5,
+      attendedRaids: 1,
+      lastRaid: '2024-10-20',
+    },
+    joinDate: '2024-09-01',
+    notes: 'Social member. Still leveling.',
+    createdAt: '2024-09-01T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '14',
+    name: 'Elemshaman',
+    rank: 'Core',
+    class: 'Shaman',
+    spec: 'Elemental',
+    role: 'DPS',
+    level: 60,
+    gearInfo: {
+      gearScore: 458,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: true,
+      aq20: true,
+      aq40: true,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Engineering', skill: 300 },
+      { profession: 'Mining', skill: 300 },
+    ],
+    attendance: {
+      percentage: 89,
+      totalRaids: 36,
+      attendedRaids: 32,
+      lastRaid: '2024-11-30',
+    },
+    joinDate: '2024-02-25',
+    createdAt: '2024-02-25T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+  {
+    id: '15',
+    name: 'Moonkin',
+    rank: 'Core',
+    class: 'Druid',
+    spec: 'Balance',
+    role: 'DPS',
+    level: 60,
+    gearInfo: {
+      gearScore: 445,
+    },
+    attunements: {
+      mc: true,
+      onyxia: true,
+      bwl: true,
+      aq20: true,
+      aq40: false,
+      naxx: false,
+    },
+    professions: [
+      { profession: 'Herbalism', skill: 300 },
+      { profession: 'Alchemy', skill: 300 },
+    ],
+    attendance: {
+      percentage: 86,
+      totalRaids: 32,
+      attendedRaids: 27,
+      lastRaid: '2024-11-30',
+    },
+    joinDate: '2024-03-15',
+    notes: 'Meme spec but we love them anyway.',
+    createdAt: '2024-03-15T00:00:00Z',
+    updatedAt: '2024-12-01T00:00:00Z',
+  },
+];
+
+/**
+ * Get mock roster members (simulates async fetch)
+ */
+export async function getMockRosterMembers(): Promise<RosterMember[]> {
+  // Simulate network delay
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  return MOCK_ROSTER_MEMBERS;
+}
+
+/**
+ * Get a mock roster member by ID
+ */
+export async function getMockRosterMemberById(
+  id: string
+): Promise<RosterMember | null> {
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  return MOCK_ROSTER_MEMBERS.find((m) => m.id === id) || null;
+}
