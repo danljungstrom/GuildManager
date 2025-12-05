@@ -19,18 +19,12 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import { useRosterStore } from '@/lib/stores/roster-store';
 import { ClassIcon } from '@/components/wow/ClassIcon';
 import { RoleIcon } from '@/components/wow/RoleIcon';
 import { SpecIcon } from '@/components/wow/SpecIcon';
 import { AttendanceBadge } from '@/components/wow/AttendanceBadge';
 import type { RosterMember, RosterSortField } from '@/lib/types/roster.types';
-import { getRankDisplayName } from '@/lib/types/roster.types';
 import { cn } from '@/lib/utils';
 
 interface RosterTableRowProps {
@@ -41,27 +35,35 @@ interface RosterTableRowProps {
 function RosterTableRow({ member, onSelect }: RosterTableRowProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const handleToggleExpand = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsExpanded(!isExpanded);
+  };
+
   return (
-    <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+    <>
       <TableRow
         className="cursor-pointer hover:bg-muted/50"
         onClick={() => onSelect(member)}
       >
         {/* Expand Toggle */}
-        <TableCell className="w-12">
-          <CollapsibleTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </Button>
-          </CollapsibleTrigger>
+        <TableCell className="w-[50px]">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={handleToggleExpand}
+          >
+            {isExpanded ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
         </TableCell>
 
         {/* Character Name */}
-        <TableCell className="font-medium">
+        <TableCell className="w-[150px] font-medium">
           <div className="flex items-center gap-2">
             <ClassIcon className={member.class} variant="icon" size="sm" />
             <span className={`class-${member.class.toLowerCase()}`}>
@@ -71,24 +73,24 @@ function RosterTableRow({ member, onSelect }: RosterTableRowProps) {
         </TableCell>
 
         {/* Rank */}
-        <TableCell>
+        <TableCell className="w-[100px]">
           <Badge variant="outline">{member.rank}</Badge>
         </TableCell>
 
         {/* Class */}
-        <TableCell>
+        <TableCell className="w-[100px]">
           <ClassIcon className={member.class} variant="text" showText />
         </TableCell>
 
         {/* Role */}
-        <TableCell>
+        <TableCell className="w-[90px]">
           {member.role && (
             <RoleIcon role={member.role} variant="both" size="sm" showText />
           )}
         </TableCell>
 
         {/* Spec */}
-        <TableCell>
+        <TableCell className="w-[120px]">
           {member.spec && (
             <SpecIcon
               className={member.class}
@@ -100,17 +102,17 @@ function RosterTableRow({ member, onSelect }: RosterTableRowProps) {
         </TableCell>
 
         {/* Level */}
-        <TableCell className="text-center">
+        <TableCell className="w-[60px] text-center">
           {member.level || '-'}
         </TableCell>
 
         {/* Gear Score */}
-        <TableCell className="text-center">
+        <TableCell className="w-[60px] text-center">
           {member.gearInfo?.gearScore || '-'}
         </TableCell>
 
         {/* Attendance */}
-        <TableCell>
+        <TableCell className="w-[110px]">
           {member.attendance ? (
             <AttendanceBadge
               status={
@@ -130,9 +132,9 @@ function RosterTableRow({ member, onSelect }: RosterTableRowProps) {
       </TableRow>
 
       {/* Expanded Row Details */}
-      <TableRow>
-        <TableCell colSpan={9} className="p-0 border-0">
-          <CollapsibleContent>
+      {isExpanded && (
+        <TableRow className="hover:bg-transparent">
+          <TableCell colSpan={9} className="p-0 border-0">
             <div className="p-4 bg-muted/30 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Player Info */}
@@ -229,10 +231,10 @@ function RosterTableRow({ member, onSelect }: RosterTableRowProps) {
                 </div>
               )}
             </div>
-          </CollapsibleContent>
-        </TableCell>
-      </TableRow>
-    </Collapsible>
+          </TableCell>
+        </TableRow>
+      )}
+    </>
   );
 }
 
@@ -277,12 +279,12 @@ export function RosterTable() {
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="rounded-md border overflow-x-auto">
+      <Table className="table-fixed min-w-[900px]">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-12"></TableHead>
-            <TableHead className="text-left">
+            <TableHead className="w-[50px]"></TableHead>
+            <TableHead className="w-[150px] text-left">
               <Button
                 variant="ghost"
                 onClick={() => handleSort('name')}
@@ -292,7 +294,7 @@ export function RosterTable() {
                 {getSortIcon('name')}
               </Button>
             </TableHead>
-            <TableHead className="text-left">
+            <TableHead className="w-[100px] text-left">
               <Button
                 variant="ghost"
                 onClick={() => handleSort('rank')}
@@ -302,7 +304,7 @@ export function RosterTable() {
                 {getSortIcon('rank')}
               </Button>
             </TableHead>
-            <TableHead className="text-left">
+            <TableHead className="w-[100px] text-left">
               <Button
                 variant="ghost"
                 onClick={() => handleSort('class')}
@@ -312,29 +314,29 @@ export function RosterTable() {
                 {getSortIcon('class')}
               </Button>
             </TableHead>
-            <TableHead className="text-left">Role</TableHead>
-            <TableHead className="text-left">Spec</TableHead>
-            <TableHead className="text-center">
+            <TableHead className="w-[90px] text-left">Role</TableHead>
+            <TableHead className="w-[120px] text-left">Spec</TableHead>
+            <TableHead className="w-[60px] text-center">
               <Button
                 variant="ghost"
                 onClick={() => handleSort('level')}
-                className="flex items-center justify-center p-0 h-auto font-semibold hover:bg-transparent mx-auto"
+                className="flex items-center justify-center p-0 h-auto font-semibold hover:bg-transparent"
               >
                 Level
                 {getSortIcon('level')}
               </Button>
             </TableHead>
-            <TableHead className="text-center">
+            <TableHead className="w-[60px] text-center">
               <Button
                 variant="ghost"
                 onClick={() => handleSort('gearScore')}
-                className="flex items-center justify-center p-0 h-auto font-semibold hover:bg-transparent mx-auto"
+                className="flex items-center justify-center p-0 h-auto font-semibold hover:bg-transparent"
               >
                 GS
                 {getSortIcon('gearScore')}
               </Button>
             </TableHead>
-            <TableHead className="text-left">
+            <TableHead className="w-[110px] text-left">
               <Button
                 variant="ghost"
                 onClick={() => handleSort('attendance')}
