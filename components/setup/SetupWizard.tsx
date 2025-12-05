@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/contexts/AdminContext';
 import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertCircle, CheckCircle2, LogOut } from 'lucide-react';
+import { toastSuccess, toastError } from '@/lib/utils/toast';
 
 // Discord icon component
 function DiscordIcon({ className }: { className?: string }) {
@@ -109,10 +110,18 @@ export default function SetupWizard() {
       // Refresh the guild config context to reflect the new configuration
       await refreshConfig();
 
+      toastSuccess('Guild setup complete!', {
+        description: `Welcome to ${guildName}`,
+      });
+
       // Redirect to homepage
       router.push('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save configuration');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save configuration';
+      toastError('Setup failed', {
+        description: errorMessage,
+      });
+      setError(errorMessage);
       setLoading(false);
     }
   };

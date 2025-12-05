@@ -25,7 +25,6 @@ import { RoleIcon } from '@/components/wow/RoleIcon';
 import { SpecIcon } from '@/components/wow/SpecIcon';
 import { AttendanceBadge } from '@/components/wow/AttendanceBadge';
 import type { RosterMember, RosterSortField } from '@/lib/types/roster.types';
-import { cn } from '@/lib/utils';
 
 interface RosterTableRowProps {
   member: RosterMember;

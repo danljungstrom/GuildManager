@@ -6,7 +6,6 @@
  */
 
 import type { RosterMember } from '@/lib/types/roster.types';
-import { initializeAttunements } from '@/lib/types/roster.types';
 
 /**
  * Generate mock roster members with realistic data

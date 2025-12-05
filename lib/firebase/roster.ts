@@ -16,9 +16,6 @@ import {
   writeBatch,
   query,
   where,
-  orderBy,
-  Timestamp,
-  type QueryConstraint,
 } from 'firebase/firestore';
 import { db } from './config';
 import type {

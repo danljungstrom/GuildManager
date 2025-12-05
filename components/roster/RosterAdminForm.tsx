@@ -17,6 +17,17 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,7 +44,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRosterStore } from '@/lib/stores/roster-store';
 import { CLASSES, getClassSpecializations, getAvailableRolesForClass } from '@/lib/consts/classes';
-import { ROLES, EXTRA_ROLES } from '@/lib/consts/roles';
+import { EXTRA_ROLES } from '@/lib/consts/roles';
 import { PROFESSIONS, PROFESSION_SKILL_LEVELS } from '@/lib/consts/professions';
 import {
   GUILD_RANKS,
@@ -47,7 +58,7 @@ import type { ClassType } from '@/lib/types/classes.types';
 import type { RoleType, ExtraRoleType } from '@/lib/types/roles.types';
 import type { Profession } from '@/lib/types/professions.types';
 import { createRosterMember, updateRosterMember, deleteRosterMember } from '@/lib/firebase/roster';
-import { cn } from '@/lib/utils';
+import { toastSuccess, toastError } from '@/lib/utils/toast';
 
 interface RosterAdminFormProps {
   isOpen: boolean;
@@ -66,6 +77,7 @@ export function RosterAdminForm({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
 
   // Form state
   const [name, setName] = useState('');
@@ -190,7 +202,7 @@ export function RosterAdminForm({
   const handleSubmit = async () => {
     // Validation
     if (!name.trim()) {
-      setError('Character name is required');
+      toastError('Character name is required');
       return;
     }
 
@@ -201,7 +213,7 @@ export function RosterAdminForm({
       const memberData: CreateRosterMember = {
         name: name.trim(),
         playerName: playerName.trim() || undefined,
-        rank: rank as any,
+        rank: rank as CreateRosterMember['rank'],
         class: className,
         spec: spec || undefined,
         offSpec: offSpec || undefined,
@@ -221,46 +233,52 @@ export function RosterAdminForm({
         // Update existing member
         await updateRosterMember(editingMember.id, memberData);
         updateMemberInStore(editingMember.id, memberData);
+        toastSuccess('Member updated successfully', {
+          description: `${name} has been updated`,
+        });
       } else {
         // Create new member
         const newMember = await createRosterMember(memberData);
         addMember(newMember);
+        toastSuccess('Member added successfully', {
+          description: `${name} has been added to the roster`,
+        });
       }
 
       handleClose();
     } catch (err) {
       console.error('Error saving roster member:', err);
-      setError(
-        err instanceof Error ? err.message : 'Failed to save roster member'
-      );
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save roster member';
+      toastError('Failed to save member', {
+        description: errorMessage,
+      });
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async () => {
+  const confirmDelete = async () => {
     if (!editingMember?.id) return;
-
-    if (
-      !confirm(
-        `Are you sure you want to delete ${editingMember.name} from the roster?`
-      )
-    ) {
-      return;
-    }
 
     setIsSubmitting(true);
     setError(null);
+    setShowDeleteAlert(false);
 
     try {
       await deleteRosterMember(editingMember.id);
       removeMember(editingMember.id);
+      toastSuccess('Member deleted', {
+        description: `${editingMember.name} has been removed from the roster`,
+      });
       handleClose();
     } catch (err) {
       console.error('Error deleting roster member:', err);
-      setError(
-        err instanceof Error ? err.message : 'Failed to delete roster member'
-      );
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete roster member';
+      toastError('Failed to delete member', {
+        description: errorMessage,
+      });
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -578,15 +596,36 @@ export function RosterAdminForm({
         <DialogFooter className="flex justify-between">
           <div>
             {editingMember && (
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={isSubmitting}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
+              <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    disabled={isSubmitting}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete {editingMember.name}?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete{' '}
+                      <span className="font-semibold">{editingMember.name}</span> from the roster.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={confirmDelete}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
           <div className="flex gap-2">

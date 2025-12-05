@@ -7,15 +7,13 @@
 
 'use client';
 
-import { X, User, Calendar, Shield, Briefcase, CheckCircle2 } from 'lucide-react';
+import { User, Calendar, Shield, Briefcase, CheckCircle2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useRosterStore } from '@/lib/stores/roster-store';

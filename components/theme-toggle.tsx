@@ -6,27 +6,33 @@ import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { useThemeStore } from '@/lib/stores/theme-store';
 import { getThemePreset } from '@/lib/constants/theme-presets';
+import { setThemeCookie, getClientTheme, type ThemeMode } from '@/lib/utils/theme-cookie';
 
 interface ThemeToggleProps {
   collapsed?: boolean;
 }
 
 export function ThemeToggle({ collapsed = false }: ThemeToggleProps) {
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<ThemeMode>('dark');
+  const [mounted, setMounted] = useState(false);
   const activePresetId = useThemeStore((state) => state.activePresetId);
 
   useEffect(() => {
-    // Check initial theme
-    const isDark = document.documentElement.classList.contains('dark');
-    setTheme(isDark ? 'dark' : 'light');
+    // Get theme from cookie on mount
+    const currentTheme = getClientTheme();
+    setTheme(currentTheme);
+    setMounted(true);
   }, []);
 
   const toggleTheme = (checked?: boolean) => {
     // If called from switch, use the checked value; if from button, toggle
-    const newTheme = checked !== undefined 
+    const newTheme: ThemeMode = checked !== undefined
       ? (checked ? 'dark' : 'light')
       : (theme === 'dark' ? 'light' : 'dark');
     setTheme(newTheme);
+
+    // Save to cookie for SSR persistence
+    setThemeCookie(newTheme);
 
     // Toggle dark class
     if (newTheme === 'dark') {
@@ -39,7 +45,7 @@ export function ThemeToggle({ collapsed = false }: ThemeToggleProps) {
     const preset = getThemePreset(activePresetId);
     if (preset) {
       const colors = newTheme === 'dark' ? preset.colors.dark : preset.colors.light;
-      
+
       // Apply color variables
       Object.entries(colors).forEach(([key, value]) => {
         const cssVarName = `--${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`;
@@ -55,6 +61,24 @@ export function ThemeToggle({ collapsed = false }: ThemeToggleProps) {
     // Dispatch event so other components can react
     window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: newTheme } }));
   };
+
+  // Prevent hydration mismatch - don't render until mounted
+  if (!mounted) {
+    if (collapsed) {
+      return (
+        <Button variant="ghost" size="icon" className="h-8 w-8" disabled>
+          <Moon className="h-4 w-4" />
+        </Button>
+      );
+    }
+    return (
+      <div className="flex items-center gap-2">
+        <Sun className="h-4 w-4 text-muted-foreground" />
+        <Switch checked={true} disabled aria-label="Toggle theme" />
+        <Moon className="h-4 w-4 text-muted-foreground" />
+      </div>
+    );
+  }
 
   // Collapsed mode - show button with current theme icon
   if (collapsed) {

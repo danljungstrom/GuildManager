@@ -8,7 +8,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Settings, ArrowUpDown } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Plus, Settings } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,10 +18,18 @@ import { useRosterStore, useRosterStats } from '@/lib/stores/roster-store';
 import { RosterSearch } from '@/components/roster/RosterSearch';
 import { RosterFilters } from '@/components/roster/RosterFilters';
 import { RosterTable } from '@/components/roster/RosterTable';
-import { CharacterDetail } from '@/components/roster/CharacterDetail';
-import { RosterAdminForm } from '@/components/roster/RosterAdminForm';
-import { getMockRosterMembers } from '@/lib/mock/roster-data';
 import { getAllRosterMembers } from '@/lib/firebase/roster';
+
+// Dynamically import heavy components (only loaded when needed)
+const CharacterDetail = dynamic(
+  () => import('@/components/roster/CharacterDetail').then((mod) => ({ default: mod.CharacterDetail })),
+  { ssr: false }
+);
+
+const RosterAdminForm = dynamic(
+  () => import('@/components/roster/RosterAdminForm').then((mod) => ({ default: mod.RosterAdminForm })),
+  { ssr: false }
+);
 
 export default function RosterPage() {
   const [isAdminFormOpen, setIsAdminFormOpen] = useState(false);
@@ -63,11 +72,6 @@ export default function RosterPage() {
 
   const handleAddMember = () => {
     setEditingMemberId(null);
-    setIsAdminFormOpen(true);
-  };
-
-  const handleEditMember = (memberId: string) => {
-    setEditingMemberId(memberId);
     setIsAdminFormOpen(true);
   };
 
