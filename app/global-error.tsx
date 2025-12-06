@@ -28,19 +28,34 @@ export default function GlobalError({
           <p style={{ color: '#666', marginBottom: '24px' }}>
             Something went wrong with the application
           </p>
-          <button
-            onClick={reset}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#000',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer'
-            }}
-          >
-            Try again
-          </button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button
+              onClick={() => window.history.back()}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: 'transparent',
+                color: '#000',
+                border: '1px solid #ccc',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Go back
+            </button>
+            <button
+              onClick={reset}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#000',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer'
+              }}
+            >
+              Retry
+            </button>
+          </div>
         </div>
       </body>
     </html>

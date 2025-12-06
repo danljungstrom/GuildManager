@@ -396,12 +396,12 @@ export function RosterAdminForm({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="offSpec">Off Spec</Label>
-                <Select value={offSpec} onValueChange={setOffSpec}>
+                <Select value={offSpec || "none"} onValueChange={(v) => setOffSpec(v === "none" ? "" : v)}>
                   <SelectTrigger id="offSpec">
                     <SelectValue placeholder="Select off spec" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {availableSpecs.map((s) => (
                       <SelectItem key={s} value={s}>
                         {s}

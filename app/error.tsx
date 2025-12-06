@@ -48,11 +48,11 @@ export default function Error({
           )}
         </CardContent>
         <CardFooter className="flex gap-2">
-          <Button onClick={reset} variant="default">
-            Try again
+          <Button onClick={() => window.history.back()} variant="outline">
+            Go back
           </Button>
-          <Button onClick={() => window.location.href = '/'} variant="outline">
-            Go home
+          <Button onClick={reset} variant="default">
+            Retry
           </Button>
         </CardFooter>
       </Card>
