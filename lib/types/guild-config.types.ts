@@ -57,15 +57,83 @@ export interface ThemeTypography {
 }
 
 /**
+ * Logo shape options
+ * 'none' means no background/container - just the raw icon
+ */
+export type LogoShape = 'none' | 'circle' | 'square' | 'rounded';
+
+/**
+ * Logo frame style options
+ */
+export type LogoFrame = 'none' | 'simple' | 'ornate' | 'celtic' | 'chain' | 'runic' | 'thorns' | 'dragon';
+
+/**
+ * Logo glow style options
+ */
+export type LogoGlow = 'none' | 'soft' | 'medium' | 'intense' | 'pulse';
+
+/**
+ * Logo type options
+ */
+export type LogoType = 'library-icon' | 'custom-image' | 'theme-icon' | 'none';
+
+/**
+ * Crop settings for custom images
+ * Allows editing crop/zoom after upload without re-uploading
+ */
+export interface CropSettings {
+  x: number;      // X offset percentage (0-100)
+  y: number;      // Y offset percentage (0-100)
+  zoom: number;   // Zoom level (1-3)
+}
+
+/**
+ * A saved logo entry for history - stores full logo config for reverting
+ */
+export interface LogoHistoryEntry {
+  type: LogoType;
+  path?: string;
+  artist?: string;
+  shape?: LogoShape;
+  frame?: LogoFrame;
+  iconColor?: string;
+  frameColor?: string;
+  glow?: LogoGlow;
+  glowColor?: string;
+  cropSettings?: CropSettings; // For custom images
+  savedAt: string; // ISO date string
+}
+
+/**
+ * Logo configuration
+ */
+export interface LogoConfig {
+  type: LogoType;
+  path?: string; // Icon path (e.g., "lorc/sword") or image URL
+  artist?: string; // Artist name for attribution (library icons)
+  shape?: LogoShape;
+  frame?: LogoFrame;
+  iconColor?: string; // HSL color for the icon (default: primary)
+  frameColor?: string; // HSL color for the frame (default: based on frame type)
+  glow?: LogoGlow; // Glow effect style
+  glowColor?: string; // HSL color for the glow (default: frameColor or primary)
+  cropSettings?: CropSettings; // Crop/zoom settings for custom images
+  history?: LogoHistoryEntry[]; // Previous icons for reverting (max 5)
+}
+
+/**
  * Theme configuration including colors and styling preferences
  */
 export interface ThemeConfig {
   colors: ThemeColors;
   typography?: ThemeTypography; // Optional typography configuration
   darkMode?: boolean;
-  logo?: string; // URL to custom logo image OR theme icon ID
+  // Legacy logo fields (for backwards compatibility)
+  logo?: string;
   logoType?: 'theme-icon' | 'custom-image';
-  logoFrame?: boolean; // Apply border frame if logo lacks transparency
+  logoFrame?: boolean;
+  // New logo config
+  logoConfig?: LogoConfig;
   favicon?: string;
   customCSS?: string;
   borderRadius?: string;

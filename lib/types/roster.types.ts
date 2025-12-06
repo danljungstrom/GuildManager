@@ -114,6 +114,9 @@ export interface RosterMember {
   // Timestamps
   createdAt?: string; // ISO date string
   updatedAt?: string; // ISO date string
+
+  // Development/Testing
+  isMock?: boolean; // True if this is mock/test data (can be safely deleted)
 }
 
 /**

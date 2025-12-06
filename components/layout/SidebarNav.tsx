@@ -183,7 +183,6 @@ export function SidebarNav() {
     <>
       {/* Main Navigation */}
       <SidebarGroup>
-        <SidebarGroupLabel className="text-primary">Navigation</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
             {renderNavItems(navigationItems)}

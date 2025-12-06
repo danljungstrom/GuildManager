@@ -13,7 +13,15 @@
       "Bash(pnpm run build)",
       "Bash(pnpm tsc:*)",
       "Bash(mkdir:*)",
-      "Bash(pnpm run dev)"
+      "Bash(pnpm run dev)",
+      "Bash(npm install:*)",
+      "Bash(npx @anthropic-ai/mcp-playwright:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(pnpm test:e2e)",
+      "WebSearch",
+      "mcp__playwright__*",
+      "Bash(cat:*)",
+      "WebFetch(domain:game-icons.net)"
     ],
     "deny": [],
     "ask": []

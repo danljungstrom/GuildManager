@@ -37,7 +37,7 @@ export function AppSidebar() {
           ) : (
             <>
               <div className="shrink-0 [&_img]:brightness-110 [&_img]:contrast-110">
-                <GuildLogo size="sm" />
+                <GuildLogo size="md" />
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="truncate text-lg font-semibold text-primary">

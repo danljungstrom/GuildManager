@@ -308,4 +308,16 @@
   .bg-role-healer {
     background-color: hsl(var(--role-healer));
   }
+
+  /* Glow pulse animation for logo - uses --glow-color CSS variable */
+  @keyframes glow-pulse {
+    0%, 100% {
+      filter: drop-shadow(0 0 16px var(--glow-color, hsl(var(--primary))));
+      opacity: 1;
+    }
+    50% {
+      filter: drop-shadow(0 0 28px var(--glow-color, hsl(var(--primary))));
+      opacity: 0.85;
+    }
+  }
 }

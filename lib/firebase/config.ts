@@ -27,7 +27,6 @@ function initializeFirebase() {
       '- NEXT_PUBLIC_FIREBASE_API_KEY\n' +
       '- NEXT_PUBLIC_FIREBASE_PROJECT_ID\n' +
       '- NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN\n' +
-      '- NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET\n' +
       '- NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID\n' +
       '- NEXT_PUBLIC_FIREBASE_APP_ID\n\n' +
       'Check your environment variables in Vercel or your hosting platform.'

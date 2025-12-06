@@ -429,3 +429,57 @@ export async function clearAllRosterMembers(): Promise<number> {
     throw new Error('Failed to clear roster members');
   }
 }
+
+/**
+ * Remove only mock roster members (those with isMock: true)
+ * Safe operation that preserves real roster data
+ */
+export async function removeMockRosterMembers(): Promise<number> {
+  if (!db) {
+    throw new Error('Firebase not initialized');
+  }
+
+  try {
+    const rosterRef = collection(db, ROSTER_COLLECTION);
+    const q = query(rosterRef, where('isMock', '==', true));
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      return 0;
+    }
+
+    const batch = writeBatch(db);
+    let count = 0;
+
+    snapshot.docs.forEach((document) => {
+      batch.delete(document.ref);
+      count++;
+    });
+
+    await batch.commit();
+    return count;
+  } catch (error) {
+    console.error('Error removing mock roster members:', error);
+    throw new Error('Failed to remove mock roster members');
+  }
+}
+
+/**
+ * Count mock roster members
+ */
+export async function countMockRosterMembers(): Promise<number> {
+  if (!db) {
+    console.error('Firebase not initialized');
+    return 0;
+  }
+
+  try {
+    const rosterRef = collection(db, ROSTER_COLLECTION);
+    const q = query(rosterRef, where('isMock', '==', true));
+    const snapshot = await getDocs(q);
+    return snapshot.size;
+  } catch (error) {
+    console.error('Error counting mock roster members:', error);
+    return 0;
+  }
+}

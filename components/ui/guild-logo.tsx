@@ -5,11 +5,11 @@ import Image from 'next/image';
 import { useGuild } from '@/lib/contexts/GuildContext';
 import { useThemeStore } from '@/lib/stores/theme-store';
 import { getThemeIcon } from '@/lib/constants/theme-icons';
-import { getLogoFrameStyles, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { LogoPreview } from '@/components/logo/LogoPreview';
 
 interface GuildLogoProps {
   size?: 'sm' | 'md' | 'lg';
-  showFrame?: boolean;
   className?: string;
 }
 
@@ -19,43 +19,51 @@ const sizeClasses = {
   lg: 'w-24 h-24',
 };
 
+// Map GuildLogo sizes to LogoPreview sizes (GuildLogo sm = sidebar size, needs xs)
+const logoPreviewSizeMap = {
+  sm: 'xs' as const,
+  md: 'sm' as const,
+  lg: 'md' as const,
+};
+
 /**
  * GuildLogo Component
  *
- * Displays the guild's logo, which can be either:
- * - A theme-specific SVG icon (default)
- * - A custom uploaded image
- *
- * Features:
- * - Responsive sizing (sm, md, lg)
- * - Optional frame for images without transparency
- * - Fallback to theme icon if custom image fails
- * - Automatically updates when theme preset changes (for theme icons)
+ * Displays the guild's logo using the new LogoConfig system.
+ * Falls back to legacy format for backwards compatibility.
  */
-export function GuildLogo({ size = 'md', showFrame, className }: GuildLogoProps) {
+export function GuildLogo({ size = 'md', className }: GuildLogoProps) {
   const { config } = useGuild();
   const { activePresetId } = useThemeStore();
   const [imageError, setImageError] = useState(false);
 
-  // Determine size class
-  const sizeClass = sizeClasses[size];
+  // Use new logoConfig if available
+  const logoConfig = config?.theme.logoConfig;
 
-  // Get logo configuration
+  if (logoConfig && logoConfig.type !== 'none' && logoConfig.path) {
+    // Use the new LogoPreview component for full logo config support
+    return (
+      <LogoPreview
+        config={logoConfig}
+        size={logoPreviewSizeMap[size]}
+        className={className}
+      />
+    );
+  }
+
+  // Legacy fallback for old config format
+  const sizeClass = sizeClasses[size];
   const logoType = config?.theme.logoType || 'theme-icon';
   const logoUrl = config?.theme.logo;
-  const logoFrame = showFrame !== undefined ? showFrame : (config?.theme.logoFrame ?? false);
 
   // If using theme icon or custom image failed, display SVG icon
   if (logoType === 'theme-icon' || imageError || !logoUrl) {
-    // For theme icons, prefer the active preset ID from Zustand store
-    // This ensures the logo updates immediately when theme changes
-    const themeIconId = (logoType === 'theme-icon' && activePresetId) 
-      ? activePresetId 
+    const themeIconId = (logoType === 'theme-icon' && activePresetId)
+      ? activePresetId
       : (logoUrl || 'spartan');
     const themeIcon = getThemeIcon(themeIconId);
 
     if (!themeIcon) {
-      // Fallback if icon not found
       return (
         <div
           className={cn(
@@ -69,10 +77,8 @@ export function GuildLogo({ size = 'md', showFrame, className }: GuildLogoProps)
       );
     }
 
-    // Render theme SVG icon with primary color
-    // Use hsl(var(--primary)) so it updates reactively when theme changes
     return (
-      <div 
+      <div
         className={cn(sizeClass, 'flex items-center justify-center', className)}
         style={{
           backgroundColor: 'hsl(var(--primary))',
@@ -89,18 +95,16 @@ export function GuildLogo({ size = 'md', showFrame, className }: GuildLogoProps)
     );
   }
 
-  // If using custom image
-  const frameStyles = logoFrame ? getLogoFrameStyles(false, 'var(--primary)') : {};
-
+  // Legacy custom image
   return (
-    <div className={cn(sizeClass, 'flex items-center justify-center relative', className)} style={frameStyles}>
+    <div className={cn(sizeClass, 'flex items-center justify-center relative', className)}>
       <Image
         src={logoUrl}
         alt="Guild Logo"
         fill
-        className={cn('object-contain', logoFrame && 'rounded')}
+        className="object-contain"
         onError={() => setImageError(true)}
-        unoptimized // Custom URLs may not be optimizable
+        unoptimized
       />
     </div>
   );

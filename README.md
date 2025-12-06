@@ -83,6 +83,12 @@ A fully customizable guild management system for World of Warcraft guilds, built
    - Complete the setup wizard
    - Configure Discord role permissions in Admin Settings
 
+5. **Enable Custom Logo Uploads** (Optional, 2 min)
+   - In Vercel dashboard → Select your project → **Storage** tab
+   - Click **Create Database** → Select **Blob**
+   - Name it (e.g., "guild-logos") → **Create**
+   - Done! Vercel automatically adds the required environment variable
+
 ---
 
 ### For Developers

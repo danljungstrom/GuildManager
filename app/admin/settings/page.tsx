@@ -10,16 +10,16 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
-import { WoWExpansion } from '@/lib/types/guild-config.types';
-import { GuildLogo } from '@/components/ui/guild-logo';
+import { WoWExpansion, LogoConfig } from '@/lib/types/guild-config.types';
 import { useThemeStore } from '@/lib/stores/theme-store';
 import { getAllThemePresets, getThemePreset, ThemePreset } from '@/lib/constants/theme-presets';
 import { getThemeIcon } from '@/lib/constants/theme-icons';
 import { Check, RotateCcw, Database, Trash2, Users, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getMockRosterMembers } from '@/lib/mock/roster-data';
-import { populateRosterWithMockData, clearAllRosterMembers, getAllRosterMembers } from '@/lib/firebase/roster';
+import { populateRosterWithMockData, clearAllRosterMembers, getAllRosterMembers, removeMockRosterMembers, countMockRosterMembers } from '@/lib/firebase/roster';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { LogoSettings } from '@/components/logo';
 
 // Helper functions to convert between HSL and Hex
 function hslToHex(hsl: string): string {
@@ -92,6 +92,14 @@ function hexToHsl(hex: string): string {
   }
 }
 
+// Helper to remove undefined values from an object (Firestore doesn't accept undefined)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function removeUndefined<T extends object>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== undefined)
+  ) as T;
+}
+
 export default function AdminSettingsPage() {
   const { config, refreshConfig } = useGuild();
   const { activePresetId, applyPreset } = useThemeStore();
@@ -101,6 +109,7 @@ export default function AdminSettingsPage() {
 
   // Mock data generator state
   const [rosterCount, setRosterCount] = useState(0);
+  const [mockCount, setMockCount] = useState(0);
   const [mockDataLoading, setMockDataLoading] = useState(false);
   const [mockDataSuccess, setMockDataSuccess] = useState<string | null>(null);
   const [mockDataError, setMockDataError] = useState<string | null>(null);
@@ -112,6 +121,38 @@ export default function AdminSettingsPage() {
   // Custom color override (not persisted to preset)
   const [customPrimaryColor, setCustomPrimaryColor] = useState('');
 
+  // Logo configuration state
+  const [logoConfig, setLogoConfig] = useState<LogoConfig>(() => {
+    // Initialize from existing config or defaults
+    if (config?.theme.logoConfig) {
+      return config.theme.logoConfig;
+    }
+    // Convert legacy logo format to new format
+    if (config?.theme.logoType === 'theme-icon' && config?.theme.logo) {
+      return {
+        type: 'theme-icon',
+        path: config.theme.logo,
+        shape: 'none',
+        frame: 'none',
+      };
+    }
+    if (config?.theme.logoType === 'custom-image' && config?.theme.logo) {
+      return {
+        type: 'custom-image',
+        path: config.theme.logo,
+        shape: 'none',
+        frame: 'none',
+      };
+    }
+    // Default to theme icon using active preset
+    return {
+      type: 'theme-icon',
+      path: activePresetId,
+      shape: 'none',
+      frame: 'none',
+    };
+  });
+
   // Reset custom color when preset changes
   useEffect(() => {
     if (currentPreset) {
@@ -119,6 +160,35 @@ export default function AdminSettingsPage() {
       setCustomPrimaryColor(colors.primary);
     }
   }, [activePresetId, currentPreset, isDark]);
+
+  // Sync logoConfig when config loads or changes
+  useEffect(() => {
+    if (config?.theme.logoConfig) {
+      setLogoConfig(config.theme.logoConfig);
+    } else if (config?.theme.logoType === 'theme-icon' && config?.theme.logo) {
+      setLogoConfig({
+        type: 'theme-icon',
+        path: config.theme.logo,
+        shape: 'none',
+        frame: 'none',
+      });
+    } else if (config?.theme.logoType === 'custom-image' && config?.theme.logo) {
+      setLogoConfig({
+        type: 'custom-image',
+        path: config.theme.logo,
+        shape: 'none',
+        frame: 'none',
+      });
+    } else if (activePresetId) {
+      // Default to theme icon
+      setLogoConfig({
+        type: 'theme-icon',
+        path: activePresetId,
+        shape: 'none',
+        frame: 'none',
+      });
+    }
+  }, [config?.theme.logoConfig, config?.theme.logoType, config?.theme.logo, activePresetId]);
 
   // Load roster count on mount
   useEffect(() => {
@@ -129,6 +199,8 @@ export default function AdminSettingsPage() {
     try {
       const members = await getAllRosterMembers();
       setRosterCount(members.length);
+      const mockMembers = await countMockRosterMembers();
+      setMockCount(mockMembers);
     } catch (err) {
       console.error('Error loading roster count:', err);
     }
@@ -162,8 +234,30 @@ export default function AdminSettingsPage() {
     }
   };
 
+  const handleRemoveMockData = async () => {
+    if (mockCount === 0) {
+      setMockDataError('No mock data to remove');
+      return;
+    }
+
+    setMockDataLoading(true);
+    setMockDataSuccess(null);
+    setMockDataError(null);
+
+    try {
+      const count = await removeMockRosterMembers();
+      setMockDataSuccess(`Successfully removed ${count} mock members. Real roster data preserved.`);
+      await loadRosterCount();
+      setTimeout(() => setMockDataSuccess(null), 5000);
+    } catch (err) {
+      setMockDataError(err instanceof Error ? err.message : 'Failed to remove mock data');
+    } finally {
+      setMockDataLoading(false);
+    }
+  };
+
   const handleClearRoster = async () => {
-    if (!confirm('Are you sure you want to delete ALL roster members? This action cannot be undone!')) {
+    if (!confirm('Are you sure you want to delete ALL roster members? This action cannot be undone!\n\nThis will delete REAL data, not just mock data. Consider using "Remove Mock Data" instead if you only want to clear test data.')) {
       return;
     }
 
@@ -251,6 +345,31 @@ export default function AdminSettingsPage() {
     });
     // Reset colors to preset
     handleResetColors();
+    // Reset logo config to saved value
+    if (config?.theme.logoConfig) {
+      setLogoConfig(config.theme.logoConfig);
+    } else if (config?.theme.logoType === 'theme-icon' && config?.theme.logo) {
+      setLogoConfig({
+        type: 'theme-icon',
+        path: config.theme.logo,
+        shape: 'none',
+        frame: 'none',
+      });
+    } else if (config?.theme.logoType === 'custom-image' && config?.theme.logo) {
+      setLogoConfig({
+        type: 'custom-image',
+        path: config.theme.logo,
+        shape: 'none',
+        frame: 'none',
+      });
+    } else {
+      setLogoConfig({
+        type: 'theme-icon',
+        path: activePresetId,
+        shape: 'none',
+        frame: 'none',
+      });
+    }
     setError(null);
     setSuccess(false);
   };
@@ -274,6 +393,35 @@ export default function AdminSettingsPage() {
             ...config.theme.colors,
             primary: customPrimaryColor,
           },
+          logoConfig: {
+            type: logoConfig.type,
+            path: logoConfig.path,
+            shape: logoConfig.shape,
+            frame: logoConfig.frame,
+            // Only include optional fields if they have values
+            ...(logoConfig.artist && { artist: logoConfig.artist }),
+            ...(logoConfig.iconColor && { iconColor: logoConfig.iconColor }),
+            ...(logoConfig.frameColor && { frameColor: logoConfig.frameColor }),
+            ...(logoConfig.glow && logoConfig.glow !== 'none' && { glow: logoConfig.glow }),
+            ...(logoConfig.glowColor && { glowColor: logoConfig.glowColor }),
+            ...(logoConfig.cropSettings && { cropSettings: logoConfig.cropSettings }),
+            // Preserve history - only include entries with required fields
+            ...(logoConfig.history?.length && {
+              history: logoConfig.history.map(entry => ({
+                type: entry.type,
+                path: entry.path,
+                savedAt: entry.savedAt,
+                ...(entry.artist && { artist: entry.artist }),
+                ...(entry.shape && entry.shape !== 'none' && { shape: entry.shape }),
+                ...(entry.frame && entry.frame !== 'none' && { frame: entry.frame }),
+                ...(entry.iconColor && { iconColor: entry.iconColor }),
+                ...(entry.frameColor && { frameColor: entry.frameColor }),
+                ...(entry.glow && entry.glow !== 'none' && { glow: entry.glow }),
+                ...(entry.glowColor && { glowColor: entry.glowColor }),
+                ...(entry.cropSettings && { cropSettings: entry.cropSettings }),
+              })),
+            }),
+          } as LogoConfig,
         },
         features: {
           enableRaidPlanning: formData.enableRaidPlanning,
@@ -322,7 +470,7 @@ export default function AdminSettingsPage() {
               <TabsList>
                 <TabsTrigger value="general">General</TabsTrigger>
                 <TabsTrigger value="theme">Theme</TabsTrigger>
-                <TabsTrigger value="branding">Logo & Branding</TabsTrigger>
+                <TabsTrigger value="logo">Logo</TabsTrigger>
                 <TabsTrigger value="features">Features</TabsTrigger>
                 <TabsTrigger value="development">Development</TabsTrigger>
               </TabsList>
@@ -506,103 +654,11 @@ export default function AdminSettingsPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="branding">
-            <Card>
-              <CardHeader>
-                <CardTitle>Logo & Branding</CardTitle>
-                <CardDescription>
-                  Customize your guild&apos;s visual identity
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-base font-semibold">Current Logo</Label>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Your guild is currently using the {config?.theme.logoType === 'theme-icon' ? 'theme icon' : 'custom logo'}
-                    </p>
-                    <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border">
-                      <div className="w-16 h-16 flex items-center justify-center bg-background rounded-lg border">
-                        <GuildLogo size="md" className="w-16 h-16" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium">
-                          {config?.theme.logoType === 'theme-icon'
-                            ? `${config?.theme.logo?.charAt(0).toUpperCase()}${config?.theme.logo?.slice(1)} Theme Icon`
-                            : 'Custom Logo'}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {config?.theme.logoType === 'theme-icon'
-                            ? 'Default theme icon from your selected color scheme'
-                            : 'Custom uploaded image'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t">
-                    <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                      <div className="mt-0.5">
-                        <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                          Custom Logo Upload - Coming Soon
-                        </p>
-                        <div className="text-sm text-blue-600 dark:text-blue-400 space-y-1">
-                          <p>The custom logo upload feature is planned for a future release. When implemented, you will be able to:</p>
-                          <ul className="list-disc list-inside ml-2 space-y-1">
-                            <li>Upload custom images (PNG, JPG, SVG, WebP)</li>
-                            <li>Preview your logo before saving</li>
-                            <li>Toggle frame borders for images without transparency</li>
-                            <li>Automatically detect image transparency</li>
-                            <li>Store logos securely in Firebase Storage</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* TODO: Implement custom logo upload
-                      - File input accepting PNG, JPG, SVG, WebP
-                      - Image preview with frame toggle
-                      - Upload to Firebase Storage
-                      - Update guild config with logo URL
-                      - Automatic transparency detection
-                      - Image optimization and resizing
-                      - Validation (file size, dimensions, format)
-                  */}
-
-                  <div className="space-y-3 opacity-50 pointer-events-none">
-                    <Label htmlFor="logoUpload" className="text-base font-semibold">
-                      Upload Custom Logo (Coming Soon)
-                    </Label>
-                    <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                      <div className="flex flex-col items-center gap-2">
-                        <svg className="w-12 h-12 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
-                        <p className="text-sm text-muted-foreground">
-                          Click to upload or drag and drop
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          PNG, JPG, SVG or WebP (max. 2MB)
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-2">
-                      <Switch id="logoFrame" disabled />
-                      <Label htmlFor="logoFrame" className="text-sm">
-                        Add frame border (for images without transparency)
-                      </Label>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="logo">
+            <LogoSettings
+              config={logoConfig}
+              onChange={setLogoConfig}
+            />
           </TabsContent>
 
           <TabsContent value="features">
@@ -706,6 +762,11 @@ export default function AdminSettingsPage() {
                       <div>
                         <p className="text-sm font-medium">Current Roster Size</p>
                         <p className="text-2xl font-bold text-primary">{rosterCount} members</p>
+                        {mockCount > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            ({mockCount} mock, {rosterCount - mockCount} real)
+                          </p>
+                        )}
                       </div>
                     </div>
                     <Button
@@ -753,12 +814,28 @@ export default function AdminSettingsPage() {
                     </div>
 
                     <div className="pt-4 border-t">
+                      <h4 className="text-sm font-semibold mb-2">Remove Mock Data</h4>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Safely remove only mock/test members from the roster. Real roster data will be preserved.
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={handleRemoveMockData}
+                        disabled={mockDataLoading || mockCount === 0}
+                        className="w-full sm:w-auto"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {mockDataLoading ? 'Removing...' : `Remove ${mockCount} Mock Members`}
+                      </Button>
+                    </div>
+
+                    <div className="pt-4 border-t border-destructive/30">
                       <h4 className="text-sm font-semibold mb-2 flex items-center gap-2 text-destructive">
-                        <Trash2 className="h-4 w-4" />
+                        <AlertTriangle className="h-4 w-4" />
                         Danger Zone
                       </h4>
                       <p className="text-sm text-muted-foreground mb-3">
-                        Clear all roster members from the database. This action cannot be undone!
+                        Delete ALL roster members including real data. This cannot be undone! Consider using &quot;Remove Mock Data&quot; instead.
                       </p>
                       <Button
                         variant="destructive"
@@ -767,7 +844,7 @@ export default function AdminSettingsPage() {
                         className="w-full sm:w-auto"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        {mockDataLoading ? 'Clearing...' : 'Clear All Roster Data'}
+                        {mockDataLoading ? 'Clearing...' : 'Clear ALL Roster Data'}
                       </Button>
                     </div>
                   </div>
@@ -789,7 +866,7 @@ export default function AdminSettingsPage() {
           </TabsContent>
         </Tabs>
 
-            <div className="sticky bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 mt-4 flex justify-between items-center">
+            <div className="sticky bottom-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t py-4 mt-4 flex justify-between items-center">
               <div className="flex-1">
                 {success && (
                   <span className="text-sm text-green-500">Settings saved successfully!</span>

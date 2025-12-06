@@ -531,11 +531,13 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
 
 /**
  * Get mock roster members (simulates async fetch)
+ * Automatically adds isMock: true flag to identify mock data
  */
 export async function getMockRosterMembers(): Promise<RosterMember[]> {
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 500));
-  return MOCK_ROSTER_MEMBERS;
+  // Add isMock flag to all mock members for safe identification/deletion
+  return MOCK_ROSTER_MEMBERS.map(member => ({ ...member, isMock: true }));
 }
 
 /**
