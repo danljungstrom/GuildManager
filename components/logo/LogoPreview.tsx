@@ -108,6 +108,19 @@ export function LogoPreview({ config, size = 'lg', className }: LogoPreviewProps
   // Get the correct logo content based on type
   let logoContent: React.ReactNode;
 
+  // Calculate crop transform style (used for both images and icons)
+  const getCropTransform = (): React.CSSProperties => {
+    if (!cropSettings) return {};
+    const translateX = (50 - cropSettings.x) * (cropSettings.zoom - 1) / cropSettings.zoom;
+    const translateY = (50 - cropSettings.y) * (cropSettings.zoom - 1) / cropSettings.zoom;
+    return {
+      transform: `scale(${cropSettings.zoom}) translate(${translateX}%, ${translateY}%)`,
+      transformOrigin: `${cropSettings.x}% ${cropSettings.y}%`,
+    };
+  };
+
+  const cropTransform = getCropTransform();
+
   if (type === 'theme-icon') {
     // Theme icons from /icons/theme-icons/
     const themeIcon = getThemeIcon(path);
@@ -117,6 +130,7 @@ export function LogoPreview({ config, size = 'lg', className }: LogoPreviewProps
         className={cn('w-full h-full', iconBgClass)}
         style={{
           ...iconBgStyle,
+          ...cropTransform,
           WebkitMask: `url(${iconPath}) center/contain no-repeat`,
           mask: `url(${iconPath}) center/contain no-repeat`,
         }}
@@ -129,41 +143,27 @@ export function LogoPreview({ config, size = 'lg', className }: LogoPreviewProps
         className={cn('w-full h-full', iconBgClass)}
         style={{
           ...iconBgStyle,
+          ...cropTransform,
           WebkitMask: `url(/icons/game-icons.net/${path}.svg) center/contain no-repeat`,
           mask: `url(/icons/game-icons.net/${path}.svg) center/contain no-repeat`,
         }}
       />
     );
   } else {
-    // Custom uploaded image - apply crop settings if available
-    const cropStyle: React.CSSProperties = cropSettings
-      ? {
-          transform: `scale(${cropSettings.zoom})`,
-          transformOrigin: `${cropSettings.x}% ${cropSettings.y}%`,
-        }
-      : {};
-
+    // Custom uploaded image
     logoContent = (
       <img
         src={path}
         alt="Guild logo"
         className="w-full h-full object-cover"
-        style={cropStyle}
+        style={cropTransform}
       />
     );
   }
 
-  // For custom images with no explicit shape but with a frame, use the frame's natural shape
-  // This prevents square images looking bad on circular frames
-  const effectiveShapeForCustomImage = (): LogoShape => {
-    if (type !== 'custom-image') return shape;
-    if (shape !== 'none') return shape;
-    if (frame !== 'none') return FRAME_NATURAL_SHAPE[frame];
-    return 'none';
-  };
-
-  // Use effective shape for custom images
-  const renderShape = type === 'custom-image' ? effectiveShapeForCustomImage() : shape;
+  // Use the shape directly - respect user's explicit choice
+  // (Previously auto-clipped custom images to frame shape, but this was confusing UX)
+  const renderShape = shape;
 
   // Calculate glow style
   const getGlowStyle = (): React.CSSProperties => {
@@ -217,19 +217,27 @@ export function LogoPreview({ config, size = 'lg', className }: LogoPreviewProps
   if (renderShape === 'none') {
     if (frame === 'none') {
       // Use FRAME_SIZE_MAP for consistent sizing, center the logo inside
+      // Glow on outer, clip-path on inner (so glow isn't clipped)
       return (
         <div className={cn(FRAME_SIZE_MAP[size], 'flex items-center justify-center', className)}>
           <div className={cn(SIZE_MAP[size], glowClass)} style={glowStyle}>
-            {logoContent}
+            <div className="w-full h-full" style={{ clipPath: 'inset(0)' }}>
+              {logoContent}
+            </div>
           </div>
         </div>
       );
     }
-    // With frame but no shape (only for non-custom-image types)
+    // With frame but no shape - clip to frame's natural shape
+    // Content can overlap frame decorations but stays within frame bounds
+    const frameClipShape = FRAME_NATURAL_SHAPE[frame];
     return (
       <div className={cn(FRAME_SIZE_MAP[size], 'relative', glowClass, className)} style={glowStyle}>
         <LogoFrameComponent frameType={frame} shape="none" frameColor={frameColor}>
-          <div className={cn(SIZE_MAP[size])}>
+          <div
+            className={cn(SIZE_MAP[size])}
+            style={{ clipPath: getShapeClipPath(frameClipShape) }}
+          >
             {logoContent}
           </div>
         </LogoFrameComponent>
@@ -243,23 +251,16 @@ export function LogoPreview({ config, size = 'lg', className }: LogoPreviewProps
   const paddingClass = needsPadding ? PADDING_CLASSES[size] : '';
   const scaledShapeClass = SHAPE_CLASSES_SCALED[size][renderShape];
 
-  // With shape - add background container
+  // With shape but no frame - just clip to shape, no background
   if (frame === 'none') {
-    // Use FRAME_SIZE_MAP for consistent sizing, center the logo inside
     return (
       <div className={cn(FRAME_SIZE_MAP[size], 'flex items-center justify-center', className)}>
-        <div
-          className={cn(
-            SIZE_MAP[size],
-            scaledShapeClass,
-            'overflow-hidden bg-card',
-            paddingClass,
-            glowClass
-          )}
-          style={glowStyle}
-        >
-          {/* Inner wrapper with shape clipping for icons with background colors */}
-          <div className={cn('w-full h-full', scaledShapeClass, 'overflow-hidden')}>
+        <div className={cn(SIZE_MAP[size], glowClass)} style={glowStyle}>
+          {/* Clip to shape without adding background */}
+          <div
+            className={cn('w-full h-full', paddingClass)}
+            style={{ clipPath: getShapeClipPath(renderShape) }}
+          >
             {logoContent}
           </div>
         </div>
@@ -267,11 +268,10 @@ export function LogoPreview({ config, size = 'lg', className }: LogoPreviewProps
     );
   }
 
-  // Simple frame - border directly on content (no gap)
+  // Simple frame - outline on content
   if (frame === 'simple') {
-    // Determine border color
     const isThemeColor = frameColor === THEME_COLOR_MARKER;
-    const borderColorStyle = isThemeColor
+    const outlineColorStyle = isThemeColor
       ? 'hsl(var(--primary))'
       : frameColor
         ? `hsl(${frameColor})`
@@ -280,16 +280,18 @@ export function LogoPreview({ config, size = 'lg', className }: LogoPreviewProps
     return (
       <div className={cn(FRAME_SIZE_MAP[size], 'flex items-center justify-center', className)}>
         <div
-          className={cn(
-            SIZE_MAP[size],
-            scaledShapeClass,
-            'overflow-hidden bg-background border-4',
-            paddingClass,
-            glowClass
-          )}
-          style={{ ...glowStyle, borderColor: borderColorStyle }}
+          className={cn(SIZE_MAP[size], glowClass)}
+          style={{
+            ...glowStyle,
+            outline: `4px solid ${outlineColorStyle}`,
+            outlineOffset: '-4px',
+            borderRadius: renderShape === 'circle' ? '50%' : renderShape === 'rounded' ? '0.75rem' : '0',
+          }}
         >
-          <div className={cn('w-full h-full', scaledShapeClass, 'overflow-hidden')}>
+          <div
+            className={cn('w-full h-full', paddingClass)}
+            style={{ clipPath: getShapeClipPath(renderShape) }}
+          >
             {logoContent}
           </div>
         </div>
@@ -301,15 +303,30 @@ export function LogoPreview({ config, size = 'lg', className }: LogoPreviewProps
   return (
     <div className={cn(FRAME_SIZE_MAP[size], 'relative', glowClass, className)} style={glowStyle}>
       <LogoFrameComponent frameType={frame} shape={renderShape} frameColor={frameColor}>
-        <div className={cn(SIZE_MAP[size], scaledShapeClass, 'overflow-hidden bg-background', paddingClass)}>
-          {/* Inner wrapper with shape clipping for icons with background colors */}
-          <div className={cn('w-full h-full', scaledShapeClass, 'overflow-hidden')}>
-            {logoContent}
-          </div>
+        <div
+          className={cn(SIZE_MAP[size], paddingClass)}
+          style={{ clipPath: getShapeClipPath(renderShape) }}
+        >
+          {logoContent}
         </div>
       </LogoFrameComponent>
     </div>
   );
+}
+
+// Helper to get clip-path for each shape
+function getShapeClipPath(shape: LogoShape): string {
+  switch (shape) {
+    case 'circle':
+      return 'circle(50% at 50% 50%)';
+    case 'rounded':
+      return 'inset(0 round 12px)';
+    case 'square':
+      return 'inset(0)';
+    case 'none':
+    default:
+      return 'inset(0)';
+  }
 }
 
 // Frame wrapper component

@@ -1,19 +1,19 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { ZoomIn, ZoomOut, Move, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { CropSettings, LogoShape, LogoFrame } from '@/lib/types/guild-config.types';
+import type { CropSettings, LogoShape, LogoConfig } from '@/lib/types/guild-config.types';
+import { LogoPreview } from './LogoPreview';
+import { getThemeIcon } from '@/lib/constants/theme-icons';
 
 interface ImageCropEditorProps {
-  imageUrl: string;
-  cropSettings?: CropSettings;
-  shape?: LogoShape;
-  frame?: LogoFrame;
+  config: LogoConfig;
   onChange: (settings: CropSettings) => void;
+  onShapeChange?: (shape: LogoShape) => void;
 }
 
 const DEFAULT_CROP_SETTINGS: CropSettings = {
@@ -22,28 +22,41 @@ const DEFAULT_CROP_SETTINGS: CropSettings = {
   zoom: 1,
 };
 
-// Shape classes for preview
-const SHAPE_PREVIEW_CLASSES: Record<Exclude<LogoShape, 'none'>, string> = {
-  circle: 'rounded-full',
-  square: 'rounded-none',
-  rounded: 'rounded-xl',
-};
-
 export function ImageCropEditor({
-  imageUrl,
-  cropSettings = DEFAULT_CROP_SETTINGS,
-  shape = 'circle',
-  frame = 'none',
+  config,
   onChange,
+  onShapeChange,
 }: ImageCropEditorProps) {
+  const cropSettings = config.cropSettings || DEFAULT_CROP_SETTINGS;
   const [settings, setSettings] = useState<CropSettings>(cropSettings);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const editorRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sync with external changes
   useEffect(() => {
     setSettings(cropSettings);
   }, [cropSettings]);
+
+  // Debounced onChange to prevent lag from too many parent re-renders
+  const debouncedOnChange = useCallback((updated: CropSettings) => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = setTimeout(() => {
+      onChange(updated);
+    }, 50); // 50ms debounce for smooth feel without too much lag
+  }, [onChange]);
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
 
   const updateSettings = useCallback((newSettings: Partial<CropSettings>) => {
     const updated = { ...settings, ...newSettings };
@@ -52,8 +65,8 @@ export function ImageCropEditor({
     updated.y = Math.max(0, Math.min(100, updated.y));
     updated.zoom = Math.max(1, Math.min(3, updated.zoom));
     setSettings(updated);
-    onChange(updated);
-  }, [settings, onChange]);
+    debouncedOnChange(updated);
+  }, [settings, debouncedOnChange]);
 
   const handleZoomChange = useCallback((value: number[]) => {
     updateSettings({ zoom: value[0] });
@@ -90,30 +103,44 @@ export function ImageCropEditor({
     setIsDragging(false);
   }, []);
 
-  // Calculate image transform style
-  const getImageStyle = (): React.CSSProperties => {
-    // Convert percentage position to transform
-    // At x=50, y=50: image is centered
-    // At x=0: image is positioned so left edge is at center
-    // At x=100: image is positioned so right edge is at center
+  // Get content to display in the main editor area
+  const renderEditorContent = () => {
     const translateX = (50 - settings.x) * (settings.zoom - 1) / settings.zoom;
     const translateY = (50 - settings.y) * (settings.zoom - 1) / settings.zoom;
-
-    return {
+    const transformStyle: React.CSSProperties = {
       transform: `scale(${settings.zoom}) translate(${translateX}%, ${translateY}%)`,
       transformOrigin: `${settings.x}% ${settings.y}%`,
     };
-  };
 
-  // Determine effective shape for preview
-  // If shape is 'none' and there's a frame, derive shape from frame
-  const getEffectiveShape = (): Exclude<LogoShape, 'none'> => {
-    if (shape && shape !== 'none') return shape;
-    // Default to circle when shape is none (matches frame default)
-    return 'circle';
-  };
+    if (config.type === 'custom-image' && config.path) {
+      return (
+        <img
+          src={config.path}
+          alt="Crop preview"
+          className="w-full h-full object-cover"
+          style={transformStyle}
+          draggable={false}
+        />
+      );
+    }
 
-  const effectiveShape = getEffectiveShape();
+    // For SVG icons, render a colored div with the mask
+    // Theme icons need to use getThemeIcon since path (preset ID) doesn't match filename
+    const iconPath = config.type === 'theme-icon'
+      ? (getThemeIcon(config.path || '')?.svg || `/icons/theme-icons/${config.path}.svg`)
+      : `/icons/game-icons.net/${config.path}.svg`;
+
+    return (
+      <div
+        className="w-full h-full bg-primary"
+        style={{
+          ...transformStyle,
+          WebkitMask: `url(${iconPath}) center/contain no-repeat`,
+          mask: `url(${iconPath}) center/contain no-repeat`,
+        }}
+      />
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -125,53 +152,66 @@ export function ImageCropEditor({
         </Button>
       </div>
 
-      {/* Shape Previews */}
-      <div className="flex items-center justify-center gap-4 p-4 bg-muted/30 rounded-lg">
-        {(['circle', 'square', 'rounded'] as const).map((previewShape) => (
-          <div key={previewShape} className="flex flex-col items-center gap-2">
-            <div
-              className={cn(
-                'w-20 h-20 overflow-hidden bg-background border-2',
-                SHAPE_PREVIEW_CLASSES[previewShape],
-                previewShape === effectiveShape ? 'border-primary' : 'border-muted'
-              )}
-            >
-              <img
-                src={imageUrl}
-                alt="Preview"
-                className="w-full h-full object-cover"
-                style={getImageStyle()}
-                draggable={false}
-              />
-            </div>
-            <span className={cn(
-              'text-xs capitalize',
-              previewShape === effectiveShape ? 'text-primary font-medium' : 'text-muted-foreground'
-            )}>
-              {previewShape}
-            </span>
-          </div>
-        ))}
+      {/* Shape Selection with LogoPreview */}
+      <div>
+        <Label className="text-sm font-medium mb-3 block">Background Shape</Label>
+        <div className="flex items-center justify-center gap-3 p-4 bg-muted/30 rounded-lg">
+          {(['none', 'circle', 'square', 'rounded'] as const).map((previewShape) => {
+            const isSelected = config.shape === previewShape || (config.shape === undefined && previewShape === 'none');
+
+            return (
+              <button
+                key={previewShape}
+                type="button"
+                onClick={() => onShapeChange?.(previewShape)}
+                className={cn(
+                  'flex flex-col items-center gap-2 p-2 rounded-lg transition-colors',
+                  isSelected ? 'bg-primary/10' : 'hover:bg-muted',
+                  onShapeChange ? 'cursor-pointer' : 'cursor-default'
+                )}
+              >
+                <div className={cn(
+                  'border-2 rounded',
+                  isSelected ? 'border-primary' : 'border-muted'
+                )}>
+                  <LogoPreview
+                    config={{
+                      ...config,
+                      shape: previewShape,
+                      frame: 'none',
+                      glow: 'none',
+                      cropSettings: settings,
+                    }}
+                    size="sm"
+                  />
+                </div>
+                <span className={cn(
+                  'text-xs capitalize',
+                  isSelected ? 'text-primary font-medium' : 'text-muted-foreground'
+                )}>
+                  {previewShape}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Main Editor */}
       <div
+        ref={editorRef}
         className={cn(
           'relative w-full aspect-square max-w-[300px] mx-auto overflow-hidden rounded-lg bg-muted cursor-move select-none',
           isDragging && 'cursor-grabbing'
         )}
+        style={{ clipPath: 'inset(0 round 0.5rem)' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        <img
-          src={imageUrl}
-          alt="Crop preview"
-          className="w-full h-full object-cover"
-          style={getImageStyle()}
-          draggable={false}
-        />
+        {/* Content - clip-path ensures transformed content is clipped */}
+        {renderEditorContent()}
         {/* Crosshair overlay */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute left-1/2 top-0 bottom-0 w-px bg-white/30" />

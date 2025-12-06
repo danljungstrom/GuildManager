@@ -3,16 +3,20 @@
 import { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Upload, Loader2, AlertTriangle } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Upload, Loader2, AlertTriangle, History } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { LogoHistoryEntry } from '@/lib/types/guild-config.types';
 
 interface LogoUploaderProps {
   currentImage?: string;
+  previousUploads?: LogoHistoryEntry[];
   onUpload: (imageUrl: string) => void;
+  onSelectPrevious?: (entry: LogoHistoryEntry) => void;
   onCancel?: () => void;
 }
 
-export function LogoUploader({ currentImage, onUpload, onCancel }: LogoUploaderProps) {
+export function LogoUploader({ currentImage, previousUploads, onUpload, onSelectPrevious, onCancel }: LogoUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -122,8 +126,39 @@ export function LogoUploader({ currentImage, onUpload, onCancel }: LogoUploaderP
         disabled={uploading}
       />
 
+      {/* Previous Uploads */}
+      {previousUploads && previousUploads.length > 0 && !uploading && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <History className="h-4 w-4 text-muted-foreground" />
+            <Label className="text-sm text-muted-foreground">Previous Uploads</Label>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {previousUploads.map((entry, index) => (
+              <button
+                key={`${entry.path}-${index}`}
+                onClick={() => onSelectPrevious?.(entry)}
+                className={cn(
+                  'w-16 h-16 rounded-lg overflow-hidden border-2 transition-all',
+                  currentImage === entry.path
+                    ? 'border-primary ring-2 ring-primary/20'
+                    : 'border-transparent hover:border-muted-foreground/30'
+                )}
+                title="Click to use this image"
+              >
+                <img
+                  src={entry.path}
+                  alt="Previous upload"
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Current Image Preview */}
-      {currentImage && !uploading && (
+      {currentImage && !uploading && !previousUploads?.length && (
         <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
           <img
             src={currentImage}

@@ -239,7 +239,8 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
   }, [config, onChange, addToHistory]);
 
   const handleRevertToHistory = useCallback((entry: LogoHistoryEntry) => {
-    // Restore the full config from history, keeping the current history
+    // Just switch to the selected config - don't modify history
+    // History is only updated when uploading/selecting NEW logos, not when reverting
     onChange({
       type: entry.type,
       path: entry.path,
@@ -251,7 +252,7 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
       glow: entry.glow,
       glowColor: entry.glowColor,
       cropSettings: entry.cropSettings,
-      history: config.history,
+      history: config.history, // Keep existing history unchanged
     });
     // Update local color states to match
     if (entry.iconColor) setCustomIconColor(entry.iconColor);
@@ -343,21 +344,24 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
                     </DialogHeader>
                     <LogoUploader
                       currentImage={config.type === 'custom-image' ? config.path : undefined}
+                      previousUploads={history.filter(e => e.type === 'custom-image')}
                       onUpload={handleImageUpload}
+                      onSelectPrevious={(entry) => {
+                        handleRevertToHistory(entry);
+                        setIsUploaderOpen(false);
+                      }}
                       onCancel={() => setIsUploaderOpen(false)}
                     />
                   </DialogContent>
                 </Dialog>
               </div>
 
-              {/* Crop Editor for custom images */}
-              {config.type === 'custom-image' && config.path && (
+              {/* Crop Editor with shape selection for all logo types */}
+              {config.type !== 'none' && config.path && (
                 <ImageCropEditor
-                  imageUrl={config.path}
-                  cropSettings={config.cropSettings}
-                  shape={config.shape}
-                  frame={config.frame}
+                  config={config}
                   onChange={handleCropSettingsChange}
+                  onShapeChange={handleShapeChange}
                 />
               )}
 
@@ -463,48 +467,21 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
         </CardContent>
       </Card>
 
-      {/* Shape & Frame Selection */}
+      {/* Frame & Effects */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Shape & Frame</CardTitle>
+          <CardTitle>Frame & Effects</CardTitle>
           <CardDescription>
-            Add a background shape or decorative frame
+            Add a decorative frame and glow effects
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Background Shape Options */}
-          <div>
-            <Label className="text-sm font-medium mb-3 block">Background Shape</Label>
-            <RadioGroup
-              value={config.shape || 'none'}
-              onValueChange={(value) => handleShapeChange(value as LogoShape)}
-              className="flex gap-3"
-            >
-              {SHAPE_OPTIONS.map((option) => (
-                <Label
-                  key={option.value}
-                  htmlFor={`shape-${option.value}`}
-                  className={cn(
-                    'flex flex-col items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-colors',
-                    (config.shape === option.value || (option.value === 'none' && !config.shape))
-                      ? 'border-primary bg-primary/5'
-                      : 'border-transparent bg-muted/30 hover:bg-muted/50'
-                  )}
-                >
-                  <RadioGroupItem
-                    value={option.value}
-                    id={`shape-${option.value}`}
-                    className="sr-only"
-                  />
-                  <LogoPreview
-                    config={{ ...config, shape: option.value, frame: 'none', glow: 'none' }}
-                    size="sm"
-                  />
-                  <span className="text-xs font-medium">{option.label}</span>
-                </Label>
-              ))}
-            </RadioGroup>
-          </div>
+          {/* Large Preview */}
+          {config.type !== 'none' && config.path && (
+            <div className="flex justify-center pb-2">
+              <LogoPreview config={config} size="xl" />
+            </div>
+          )}
 
           {/* Decorative Frame Options */}
           <div>
