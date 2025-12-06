@@ -510,7 +510,7 @@ export function RosterAdminForm({
                         {PROFESSIONS.map((p) => (
                           <SelectItem key={p} value={p}>
                             <div className="flex items-center gap-2">
-                              <ProfessionIcon profession={p} size="sm" />
+                              <ProfessionIcon profession={p as Profession} size="sm" />
                               <span>{p}</span>
                             </div>
                           </SelectItem>

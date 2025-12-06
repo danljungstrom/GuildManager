@@ -81,15 +81,6 @@ export default function RosterProfessionsPage() {
     return 'bg-gray-500/20 text-gray-400 border-gray-500/30'; // Apprentice
   };
 
-  // Get skill level name
-  const getSkillLabel = (skill: number): string => {
-    if (skill >= 300) return 'Master';
-    if (skill >= 225) return 'Expert';
-    if (skill >= 150) return 'Artisan';
-    if (skill >= 75) return 'Journeyman';
-    return 'Apprentice';
-  };
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -109,7 +100,7 @@ export default function RosterProfessionsPage() {
 
       {/* Profession Cards */}
       {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {professions.map((profession) => (
             <Card key={profession}>
               <CardHeader className="pb-3">
@@ -123,21 +114,10 @@ export default function RosterProfessionsPage() {
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {professions.map((profession) => {
             const professionMembers = membersByProfession[profession] || [];
             const hasMembers = professionMembers.length > 0;
-
-            // Get average skill level
-            const avgSkill = hasMembers
-              ? Math.round(
-                  professionMembers.reduce((sum, entry) => sum + entry.skill, 0) /
-                    professionMembers.length
-                )
-              : 0;
-
-            // Count masters (300 skill)
-            const masters = professionMembers.filter((entry) => entry.skill >= 300).length;
 
             return (
               <Card key={profession} className={!hasMembers ? 'opacity-60' : ''}>
@@ -154,45 +134,27 @@ export default function RosterProfessionsPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {hasMembers ? (
-                    <>
-                      {/* Statistics */}
-                      <div className="flex items-center gap-2 text-sm">
-                        <Badge variant="outline" className={getSkillColor(avgSkill)}>
-                          Avg: {avgSkill} ({getSkillLabel(avgSkill)})
-                        </Badge>
-                        {masters > 0 && (
-                          <Badge variant="outline" className="bg-orange-500/20 text-orange-400 border-orange-500/30">
-                            {masters} Master{masters !== 1 ? 's' : ''}
+                    <div className="space-y-1">
+                      {professionMembers.slice(0, 8).map(({ member, skill }) => (
+                        <div
+                          key={`${member.id}-${profession}`}
+                          className="flex items-center justify-between text-sm"
+                        >
+                          <span className="truncate">{member.name}</span>
+                          <Badge
+                            variant="secondary"
+                            className={`text-xs ${getSkillColor(skill)}`}
+                          >
+                            {skill}
                           </Badge>
-                        )}
-                      </div>
-
-                      {/* Member List */}
-                      <div className="space-y-1.5">
-                        <p className="text-xs font-medium text-muted-foreground">Members</p>
-                        <div className="space-y-1">
-                          {professionMembers.slice(0, 8).map(({ member, skill }) => (
-                            <div
-                              key={`${member.id}-${profession}`}
-                              className="flex items-center justify-between text-sm"
-                            >
-                              <span className="truncate">{member.name}</span>
-                              <Badge
-                                variant="secondary"
-                                className={`text-xs ${getSkillColor(skill)}`}
-                              >
-                                {skill}
-                              </Badge>
-                            </div>
-                          ))}
-                          {professionMembers.length > 8 && (
-                            <p className="text-xs text-muted-foreground italic pt-1">
-                              +{professionMembers.length - 8} more...
-                            </p>
-                          )}
                         </div>
-                      </div>
-                    </>
+                      ))}
+                      {professionMembers.length > 8 && (
+                        <p className="text-xs text-muted-foreground italic pt-1">
+                          +{professionMembers.length - 8} more...
+                        </p>
+                      )}
+                    </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       No guild members with {profession.toLowerCase()}
