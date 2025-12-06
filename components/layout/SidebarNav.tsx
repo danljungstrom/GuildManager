@@ -62,7 +62,8 @@ export const navigationItems: NavItem[] = [
 
 export function SidebarNav() {
   const pathname = usePathname()
-  const { setOpenMobile, isMobile } = useSidebar()
+  const { setOpenMobile, isMobile, state } = useSidebar()
+  const isCollapsed = state === "collapsed"
 
   const isActive = (href: string, isChild = false) => {
     // For child items (roster subitems), use exact match
@@ -118,14 +119,16 @@ export function SidebarNav() {
                   <span>{item.label}</span>
                 </Link>
               </SidebarMenuButton>
-              <CollapsibleTrigger asChild>
-                <button
-                  className="h-8 w-8 flex items-center justify-center hover:bg-muted/50 rounded-md transition-colors"
-                  aria-label={`Expand ${item.label} submenu`}
-                >
-                  <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                </button>
-              </CollapsibleTrigger>
+              {!isCollapsed && (
+                <CollapsibleTrigger asChild>
+                  <button
+                    className="h-8 w-8 flex items-center justify-center hover:bg-muted/50 rounded-md transition-colors"
+                    aria-label={`Expand ${item.label} submenu`}
+                  >
+                    <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  </button>
+                </CollapsibleTrigger>
+              )}
             </div>
             <CollapsibleContent>
               <SidebarMenuSub>
