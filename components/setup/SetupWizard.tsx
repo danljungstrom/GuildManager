@@ -286,20 +286,94 @@ export default function SetupWizard() {
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="expansion" className="font-heading">Expansion</Label>
-                <Select value={selectedExpansion} onValueChange={(value) => setSelectedExpansion(value as WoWExpansion)}>
-                  <SelectTrigger id="expansion">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="classic">Classic</SelectItem>
-                    <SelectItem value="tbc">The Burning Crusade</SelectItem>
-                    <SelectItem value="wotlk">Wrath of the Lich King</SelectItem>
-                    <SelectItem value="cata">Cataclysm</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedExpansion('classic')}
+                    className={`relative rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                      selectedExpansion === 'classic' ? 'border-primary ring-2 ring-primary' : 'border-border'
+                    }`}
+                  >
+                    <img
+                      src="/logos/expansions/classic.png"
+                      alt="Classic"
+                      className="w-full h-auto aspect-video object-cover"
+                    />
+                    {selectedExpansion === 'classic' && (
+                      <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                        <div className="bg-primary text-primary-foreground rounded-full p-2">
+                          <CheckCircle2 className="h-8 w-8" />
+                        </div>
+                      </div>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedExpansion('tbc')}
+                    className={`relative rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                      selectedExpansion === 'tbc' ? 'border-primary ring-2 ring-primary' : 'border-border'
+                    }`}
+                  >
+                    <img
+                      src="/logos/expansions/tbc.png"
+                      alt="The Burning Crusade"
+                      className="w-full h-auto aspect-video object-cover"
+                    />
+                    {selectedExpansion === 'tbc' && (
+                      <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                        <div className="bg-primary text-primary-foreground rounded-full p-2">
+                          <CheckCircle2 className="h-8 w-8" />
+                        </div>
+                      </div>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedExpansion('wotlk')}
+                    className={`relative rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                      selectedExpansion === 'wotlk' ? 'border-primary ring-2 ring-primary' : 'border-border'
+                    }`}
+                  >
+                    <img
+                      src="/logos/expansions/wotlk.png"
+                      alt="Wrath of the Lich King"
+                      className="w-full h-auto aspect-video object-cover"
+                    />
+                    {selectedExpansion === 'wotlk' && (
+                      <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                        <div className="bg-primary text-primary-foreground rounded-full p-2">
+                          <CheckCircle2 className="h-8 w-8" />
+                        </div>
+                      </div>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedExpansion('cata')}
+                    className={`relative rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                      selectedExpansion === 'cata' ? 'border-primary ring-2 ring-primary' : 'border-border'
+                    }`}
+                  >
+                    <img
+                      src="/logos/expansions/cata.png"
+                      alt="Cataclysm"
+                      className="w-full h-auto aspect-video object-cover"
+                    />
+                    {selectedExpansion === 'cata' && (
+                      <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                        <div className="bg-primary text-primary-foreground rounded-full p-2">
+                          <CheckCircle2 className="h-8 w-8" />
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                </div>
+
+                <p className="text-xs text-muted-foreground text-center">
                   You can change this later in admin settings if needed.
                 </p>
               </div>

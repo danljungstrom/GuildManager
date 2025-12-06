@@ -348,14 +348,48 @@ export default function AdminSettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="expansion">Expansion</Label>
                   <Select value={formData.expansion} onValueChange={(value) => setFormData({ ...formData, expansion: value as WoWExpansion })}>
-                    <SelectTrigger id="expansion">
-                      <SelectValue />
+                    <SelectTrigger id="expansion" className="h-auto py-2">
+                      <SelectValue>
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={`/logos/expansions/${formData.expansion}.png`}
+                            alt={formData.expansion}
+                            className="w-8 h-8 object-contain"
+                          />
+                          <span>
+                            {formData.expansion === 'classic' && 'Classic'}
+                            {formData.expansion === 'tbc' && 'The Burning Crusade'}
+                            {formData.expansion === 'wotlk' && 'Wrath of the Lich King'}
+                            {formData.expansion === 'cata' && 'Cataclysm'}
+                          </span>
+                        </div>
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="classic">Classic</SelectItem>
-                      <SelectItem value="tbc">The Burning Crusade</SelectItem>
-                      <SelectItem value="wotlk">Wrath of the Lich King</SelectItem>
-                      <SelectItem value="cata">Cataclysm</SelectItem>
+                      <SelectItem value="classic">
+                        <div className="flex items-center gap-2">
+                          <img src="/logos/expansions/classic.png" alt="Classic" className="w-8 h-8 object-contain" />
+                          <span>Classic</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="tbc">
+                        <div className="flex items-center gap-2">
+                          <img src="/logos/expansions/tbc.png" alt="TBC" className="w-8 h-8 object-contain" />
+                          <span>The Burning Crusade</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="wotlk">
+                        <div className="flex items-center gap-2">
+                          <img src="/logos/expansions/wotlk.png" alt="WotLK" className="w-8 h-8 object-contain" />
+                          <span>Wrath of the Lich King</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="cata">
+                        <div className="flex items-center gap-2">
+                          <img src="/logos/expansions/cata.png" alt="Cata" className="w-8 h-8 object-contain" />
+                          <span>Cataclysm</span>
+                        </div>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
