@@ -9,7 +9,7 @@ import { RoleMapping } from './auth.types';
  */
 
 export type WoWRegion = 'US' | 'EU' | 'KR' | 'TW' | 'CN';
-export type WoWExpansion = 'classic' | 'tbc' | 'wotlk' | 'cata' | 'retail';
+export type WoWExpansion = 'classic' | 'tbc' | 'wotlk' | 'cata';
 export type WoWFaction = 'Alliance' | 'Horde';
 
 /**

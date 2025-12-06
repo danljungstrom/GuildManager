@@ -54,6 +54,18 @@ export const PROFESSION_CONFIGS: Record<string, ProfessionConfig> = {
     category: 'GATHERING',
     isPrimary: true,
   },
+  Inscription: {
+    name: 'Inscription',
+    icon: '/icons/professions/inscription.png',
+    category: 'CRAFTING',
+    isPrimary: true,
+  },
+  Jewelcrafting: {
+    name: 'Jewelcrafting',
+    icon: '/icons/professions/jewelcrafting.png',
+    category: 'CRAFTING',
+    isPrimary: true,
+  },
   Leatherworking: {
     name: 'Leatherworking',
     icon: '/icons/professions/leatherworking.png',

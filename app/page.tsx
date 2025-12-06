@@ -1,28 +1,20 @@
-'use client';
-
-import { useGuild } from '@/lib/contexts/GuildContext';
-import SetupWizard from '@/components/setup/SetupWizard';
-import { Loader2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { getGuildConfigCached } from '@/lib/services/guild-config.server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function Home() {
-  const { config, loading } = useGuild();
+// Dynamically import SetupWizard (only needed for first-time setup)
+const SetupWizard = dynamic(() => import('@/components/setup/SetupWizard'));
 
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+export default async function Home() {
+  // Fetch config server-side for instant rendering
+  const config = await getGuildConfigCached();
 
   // Show setup wizard if no config exists
   if (!config) {
     return <SetupWizard />;
   }
 
-  // Dashboard view
+  // Dashboard view - fully server-rendered
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>

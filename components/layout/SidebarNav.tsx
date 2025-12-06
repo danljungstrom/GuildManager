@@ -42,16 +42,6 @@ export const navigationItems: NavItem[] = [
     icon: Users,
     children: [
       {
-        label: "All Members",
-        href: "/roster",
-        icon: Users,
-      },
-      {
-        label: "By Class/Role",
-        href: "/roster/by-class",
-        icon: Users,
-      },
-      {
         label: "Professions",
         href: "/roster/professions",
         icon: Users,
@@ -72,7 +62,8 @@ export const navigationItems: NavItem[] = [
 
 export function SidebarNav() {
   const pathname = usePathname()
-  const { setOpenMobile, isMobile } = useSidebar()
+  const { setOpenMobile, isMobile, state } = useSidebar()
+  const isCollapsed = state === "collapsed"
 
   const isActive = (href: string, isChild = false) => {
     // For child items (roster subitems), use exact match
@@ -109,24 +100,36 @@ export function SidebarNav() {
         <Collapsible
           key={item.href}
           asChild
-          defaultOpen={hasActiveChild}
+          defaultOpen={hasActiveChild || active}
           className="group/collapsible"
         >
           <SidebarMenuItem>
-            <CollapsibleTrigger asChild>
+            <div className="flex items-center">
               <SidebarMenuButton
+                asChild
                 tooltip={item.label}
-                isActive={active}
+                isActive={active && pathname === item.href}
                 className={cn(
-                  "transition-all duration-200",
-                  active && "bg-primary/10 text-white font-semibold hover:bg-primary/15 hover:text-white border-l-2 border-primary"
+                  "transition-all duration-200 flex-1",
+                  active && pathname === item.href && "bg-primary/10 text-white font-semibold hover:bg-primary/15 hover:text-white border-l-2 border-primary"
                 )}
               >
-                <Icon className={cn("h-4 w-4 transition-colors", active && "text-white")} />
-                <span>{item.label}</span>
-                <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                <Link href={item.href} onClick={handleNavigate}>
+                  <Icon className={cn("h-4 w-4 transition-colors", active && pathname === item.href && "text-white")} />
+                  <span>{item.label}</span>
+                </Link>
               </SidebarMenuButton>
-            </CollapsibleTrigger>
+              {!isCollapsed && (
+                <CollapsibleTrigger asChild>
+                  <button
+                    className="h-8 w-8 flex items-center justify-center hover:bg-muted/50 rounded-md transition-colors"
+                    aria-label={`Expand ${item.label} submenu`}
+                  >
+                    <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  </button>
+                </CollapsibleTrigger>
+              )}
+            </div>
             <CollapsibleContent>
               <SidebarMenuSub>
                 {item.children?.map((child) => {

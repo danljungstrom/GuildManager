@@ -20,7 +20,7 @@ A fully customizable guild management system for World of Warcraft guilds, built
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/danljungstrom/GuildManager)
 
-**3 Simple Steps:**
+**4 Simple Steps:**
 
 1. **Create Firebase Project** (5 min)
    - Visit [Firebase Console](https://console.firebase.google.com/)
@@ -54,21 +54,34 @@ A fully customizable guild management system for World of Warcraft guilds, built
    const analytics = getAnalytics(app);
    ```
 
-2. **Deploy to Vercel** (3 min)
+2. **Create Discord Application** (5 min)
+   - Visit [Discord Developer Portal](https://discord.com/developers/applications)
+   - Click **"New Application"** → Enter name → Create
+   - Go to **OAuth2** → **General**
+   - Copy **Client ID** and **Client Secret**
+   - Add redirect URL: `https://your-domain.vercel.app/api/auth/discord/callback`
+   - Get your Discord Server ID:
+     - Enable Developer Mode: **User Settings** → **App Settings** → **Advanced** → **Developer Mode**
+     - Right-click your Discord server → **Copy Server ID**
+
+3. **Deploy to Vercel** (3 min)
    - Click the Deploy button above
-   - Sign in or create and account
+   - Sign in or create an account
    - **Paste your entire Firebase config** when Vercel asks
    - (We'll parse it automatically - no need to enter values separately!)
+   - Add Discord environment variables:
+     ```
+     NEXT_PUBLIC_DISCORD_CLIENT_ID=your-client-id
+     DISCORD_CLIENT_SECRET=your-client-secret
+     DISCORD_GUILD_ID=your-server-id
+     ```
    - Wait for deployment (~2 minutes)
 
-3. **Setup Your Guild**
+4. **Setup Your Guild**
    - Visit your new site
+   - Sign in with Discord (you'll become the site owner)
    - Complete the setup wizard
-   - Customize in Admin Settings
-
-**📚 Detailed Guide:** [docs/QUICKSTART.md](docs/QUICKSTART.md)
-
-**💰 Cost:** $0/month (free tiers)
+   - Configure Discord role permissions in Admin Settings
 
 ---
 

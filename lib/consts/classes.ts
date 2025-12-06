@@ -25,8 +25,10 @@ export const CLASSES = [
 
 /**
  * Class configuration with icons and colors
+ * Note: Only includes classes available in Classic WoW
+ * Use expansion-specific configs for other classes
  */
-export const CLASS_CONFIGS: Record<ClassType, ClassConfig> = {
+export const CLASS_CONFIGS: Partial<Record<ClassType, ClassConfig>> = {
   Druid: {
     name: 'Druid',
     color: 'hsl(28 100% 51%)', // #FF7C0A
@@ -117,6 +119,45 @@ export const CLASS_CONFIGS: Record<ClassType, ClassConfig> = {
       { name: 'Protection', role: 'Tank', icon: '/icons/specs/warrior-protection.jpg' },
     ],
   },
+  'Death Knight': {
+    name: 'Death Knight',
+    color: 'hsl(340 75% 35%)', // #C41E3A
+    icon: '/icons/classes/deathknight.png',
+    specs: [
+      { name: 'Blood', role: 'Tank', icon: '/icons/specs/dk-blood.jpg' },
+      { name: 'Frost', role: 'DPS', icon: '/icons/specs/dk-frost.jpg' },
+      { name: 'Unholy', role: 'DPS', icon: '/icons/specs/dk-unholy.jpg' },
+    ],
+  },
+  'Demon Hunter': {
+    name: 'Demon Hunter',
+    color: 'hsl(282 80% 38%)', // #A330C9
+    icon: '/icons/classes/demonhunter.png',
+    specs: [
+      { name: 'Havoc', role: 'DPS', icon: '/icons/specs/dh-havoc.jpg' },
+      { name: 'Vengeance', role: 'Tank', icon: '/icons/specs/dh-vengeance.jpg' },
+    ],
+  },
+  Monk: {
+    name: 'Monk',
+    color: 'hsl(115 54% 55%)', // #00FF96
+    icon: '/icons/classes/monk.png',
+    specs: [
+      { name: 'Brewmaster', role: 'Tank', icon: '/icons/specs/monk-brewmaster.jpg' },
+      { name: 'Mistweaver', role: 'Healer', icon: '/icons/specs/monk-mistweaver.jpg' },
+      { name: 'Windwalker', role: 'DPS', icon: '/icons/specs/monk-windwalker.jpg' },
+    ],
+  },
+  Evoker: {
+    name: 'Evoker',
+    color: 'hsl(160 65% 48%)', // #33937F
+    icon: '/icons/classes/evoker.png',
+    specs: [
+      { name: 'Devastation', role: 'DPS', icon: '/icons/specs/evoker-devastation.jpg' },
+      { name: 'Preservation', role: 'Healer', icon: '/icons/specs/evoker-preservation.jpg' },
+      { name: 'Augmentation', role: 'DPS', icon: '/icons/specs/evoker-augmentation.jpg' },
+    ],
+  },
 };
 
 /**
@@ -177,7 +218,7 @@ export const isValidClass = (className: string): className is ClassType => {
 export const getSpecIcon = (className: ClassType, spec: string): string => {
   const classConfig = CLASS_CONFIGS[className];
   if (!classConfig) {
-    return CLASS_CONFIGS.Warrior.icon;
+    return CLASS_CONFIGS.Warrior?.icon || '';
   }
 
   const specObj = classConfig.specs.find((s) => s.name === spec);
