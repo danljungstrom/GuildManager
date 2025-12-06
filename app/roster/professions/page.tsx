@@ -6,24 +6,20 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ProfessionIcon } from "@/components/wow/ProfessionIcon"
 import { useRosterStore } from '@/lib/stores/roster-store';
+import { useGuild } from '@/lib/contexts/GuildContext';
 import { getAllRosterMembers } from '@/lib/firebase/roster';
+import { getProfessionsForExpansion } from '@/lib/consts/professions';
 import type { Profession } from '@/lib/types/professions.types';
 import type { RosterMember, ProfessionEntry } from '@/lib/types/roster.types';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-const professions: Profession[] = [
-  'Alchemy', 'Blacksmithing', 'Enchanting', 'Engineering',
-  'Herbalism', 'Leatherworking', 'Mining', 'Skinning',
-  'Tailoring', 'Cooking', 'Fishing'
-];
 
 // Map profession to members with that profession
 interface ProfessionMemberEntry {
@@ -36,6 +32,13 @@ export default function RosterProfessionsPage() {
   const setLoading = useRosterStore((state) => state.setLoading);
   const members = useRosterStore((state) => state.members);
   const setMembers = useRosterStore((state) => state.setMembers);
+  const { config } = useGuild();
+
+  // Get professions available for the guild's expansion
+  const professions = useMemo(() => {
+    const expansion = config?.metadata?.expansion || 'classic';
+    return getProfessionsForExpansion(expansion);
+  }, [config?.metadata?.expansion]);
 
   // Load roster data on mount
   useEffect(() => {

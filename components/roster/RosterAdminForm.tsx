@@ -43,9 +43,10 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRosterStore } from '@/lib/stores/roster-store';
+import { useGuild } from '@/lib/contexts/GuildContext';
 import { CLASSES, getClassSpecializations, getAvailableRolesForClass } from '@/lib/consts/classes';
 import { EXTRA_ROLES } from '@/lib/consts/roles';
-import { PROFESSIONS, PROFESSION_SKILL_LEVELS } from '@/lib/consts/professions';
+import { getProfessionsForExpansion, PROFESSION_SKILL_LEVELS } from '@/lib/consts/professions';
 import {
   GUILD_RANKS,
   CLASSIC_ATTUNEMENTS,
@@ -78,6 +79,10 @@ export function RosterAdminForm({
   const addMember = useRosterStore((state) => state.addMember);
   const updateMemberInStore = useRosterStore((state) => state.updateMember);
   const removeMember = useRosterStore((state) => state.removeMember);
+  const { config } = useGuild();
+
+  // Get professions available for the guild's expansion
+  const availableProfessions = getProfessionsForExpansion(config?.metadata?.expansion || 'classic');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -507,10 +512,10 @@ export function RosterAdminForm({
                         </div>
                       </SelectTrigger>
                       <SelectContent>
-                        {PROFESSIONS.map((p) => (
+                        {availableProfessions.map((p) => (
                           <SelectItem key={p} value={p}>
                             <div className="flex items-center gap-2">
-                              <ProfessionIcon profession={p as Profession} size="sm" />
+                              <ProfessionIcon profession={p} size="sm" />
                               <span>{p}</span>
                             </div>
                           </SelectItem>

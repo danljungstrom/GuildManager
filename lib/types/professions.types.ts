@@ -2,6 +2,8 @@
  * Profession types for global use
  */
 
+import type { WoWExpansion } from './guild-config.types';
+
 export type Profession =
   | 'Alchemy'
   | 'Blacksmithing'
@@ -24,6 +26,8 @@ export interface ProfessionConfig {
   icon: string;
   category: ProfessionCategory;
   isPrimary: boolean;
+  /** First expansion where this profession is available */
+  minExpansion: WoWExpansion;
 }
 
 export interface ProfessionSkillTier {
