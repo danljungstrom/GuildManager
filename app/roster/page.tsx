@@ -9,16 +9,19 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Plus, Settings } from 'lucide-react';
+import { Plus, Settings, Users, UserCheck, UserPlus, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRosterStore, useRosterStats } from '@/lib/stores/roster-store';
 import { RosterSearch } from '@/components/roster/RosterSearch';
 import { RosterFilters } from '@/components/roster/RosterFilters';
 import { RosterTable } from '@/components/roster/RosterTable';
 import { getAllRosterMembers } from '@/lib/firebase/roster';
+import { getClassColor } from '@/lib/consts/classes';
+import { getRoleColor } from '@/lib/consts/roles';
+import type { ClassType } from '@/lib/types/classes.types';
+import type { RoleType } from '@/lib/types/roles.types';
 
 // Dynamically import heavy components (only loaded when needed)
 const CharacterDetail = dynamic(
@@ -84,6 +87,10 @@ export default function RosterPage() {
     ? members.find((m) => m.id === editingMemberId)
     : null;
 
+  // Calculate max counts for progress bar scaling
+  const maxClassCount = Math.max(...Object.values(stats.classCounts), 1);
+  const maxRoleCount = Math.max(...Object.values(stats.roleCounts), 1);
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -113,125 +120,7 @@ export default function RosterPage() {
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Total Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-bold">{stats.totalMembers}</div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Core Raiders</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-bold">{stats.coreRaiders}</div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Trials</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-bold">{stats.trials}</div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Avg Attendance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-bold">{stats.avgAttendance}%</div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Class & Role Distribution */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Class Distribution</CardTitle>
-            <CardDescription>Members by class</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-full" />
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(stats.classCounts)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([className, count]) => (
-                    <Badge
-                      key={className}
-                      variant="outline"
-                      className={`class-${className.toLowerCase()}`}
-                    >
-                      {className}: {count}
-                    </Badge>
-                  ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Role Distribution</CardTitle>
-            <CardDescription>Members by raid role</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-full" />
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(stats.roleCounts)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([role, count]) => (
-                    <Badge
-                      key={role}
-                      variant="outline"
-                      className={`role-${role.toLowerCase()}`}
-                    >
-                      {role}: {count}
-                    </Badge>
-                  ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search and Filters */}
+      {/* Roster Table Card */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -268,6 +157,157 @@ export default function RosterPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Statistics Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Members</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <div className="text-2xl font-bold">{stats.totalMembers}</div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Core Raiders</CardTitle>
+            <UserCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <div className="text-2xl font-bold">{stats.coreRaiders}</div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Trials</CardTitle>
+            <UserPlus className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <div className="text-2xl font-bold">{stats.trials}</div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg Attendance</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <div className="text-2xl font-bold">{stats.avgAttendance}%</div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Class & Role Distribution */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Class Distribution</CardTitle>
+            <CardDescription>Members by class</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {Object.entries(stats.classCounts)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([className, count]) => {
+                    const color = getClassColor(className as ClassType);
+                    const percentage = (count / maxClassCount) * 100;
+                    return (
+                      <div key={className} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span style={{ color }}>{className}</span>
+                          <span className="text-muted-foreground">{count}</span>
+                        </div>
+                        <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${percentage}%`,
+                              backgroundColor: color,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Role Distribution</CardTitle>
+            <CardDescription>Members by raid role</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-6 w-full" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {Object.entries(stats.roleCounts)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([role, count]) => {
+                    const color = getRoleColor(role as RoleType);
+                    const percentage = (count / maxRoleCount) * 100;
+                    const totalPercentage = stats.totalMembers > 0
+                      ? Math.round((count / stats.totalMembers) * 100)
+                      : 0;
+                    return (
+                      <div key={role} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span style={{ color }}>{role}</span>
+                          <span className="text-muted-foreground">
+                            {count} <span className="text-xs">({totalPercentage}%)</span>
+                          </span>
+                        </div>
+                        <div className="h-3 w-full bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${percentage}%`,
+                              backgroundColor: color,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Character Detail Modal */}
       <CharacterDetail />
