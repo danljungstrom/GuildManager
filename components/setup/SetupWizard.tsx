@@ -287,24 +287,22 @@ export default function SetupWizard() {
               </div>
 
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setSelectedExpansion('classic')}
-                    className={`relative rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                    className={`relative rounded-lg border-2 transition-all hover:scale-[1.02] p-3 flex items-center justify-center bg-black/20 ${
                       selectedExpansion === 'classic' ? 'border-primary ring-2 ring-primary' : 'border-border'
                     }`}
                   >
                     <img
                       src="/logos/expansions/classic.png"
                       alt="Classic"
-                      className="w-full h-auto aspect-video object-cover"
+                      className="h-16 w-auto object-contain"
                     />
                     {selectedExpansion === 'classic' && (
-                      <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-                        <div className="bg-primary text-primary-foreground rounded-full p-2">
-                          <CheckCircle2 className="h-8 w-8" />
-                        </div>
+                      <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-1">
+                        <CheckCircle2 className="h-4 w-4" />
                       </div>
                     )}
                   </button>
@@ -312,20 +310,18 @@ export default function SetupWizard() {
                   <button
                     type="button"
                     onClick={() => setSelectedExpansion('tbc')}
-                    className={`relative rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                    className={`relative rounded-lg border-2 transition-all hover:scale-[1.02] p-3 flex items-center justify-center bg-black/20 ${
                       selectedExpansion === 'tbc' ? 'border-primary ring-2 ring-primary' : 'border-border'
                     }`}
                   >
                     <img
                       src="/logos/expansions/tbc.png"
                       alt="The Burning Crusade"
-                      className="w-full h-auto aspect-video object-cover"
+                      className="h-16 w-auto object-contain"
                     />
                     {selectedExpansion === 'tbc' && (
-                      <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-                        <div className="bg-primary text-primary-foreground rounded-full p-2">
-                          <CheckCircle2 className="h-8 w-8" />
-                        </div>
+                      <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-1">
+                        <CheckCircle2 className="h-4 w-4" />
                       </div>
                     )}
                   </button>
@@ -333,20 +329,18 @@ export default function SetupWizard() {
                   <button
                     type="button"
                     onClick={() => setSelectedExpansion('wotlk')}
-                    className={`relative rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                    className={`relative rounded-lg border-2 transition-all hover:scale-[1.02] p-3 flex items-center justify-center bg-black/20 ${
                       selectedExpansion === 'wotlk' ? 'border-primary ring-2 ring-primary' : 'border-border'
                     }`}
                   >
                     <img
                       src="/logos/expansions/wotlk.png"
                       alt="Wrath of the Lich King"
-                      className="w-full h-auto aspect-video object-cover"
+                      className="h-16 w-auto object-contain"
                     />
                     {selectedExpansion === 'wotlk' && (
-                      <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-                        <div className="bg-primary text-primary-foreground rounded-full p-2">
-                          <CheckCircle2 className="h-8 w-8" />
-                        </div>
+                      <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-1">
+                        <CheckCircle2 className="h-4 w-4" />
                       </div>
                     )}
                   </button>
@@ -354,20 +348,18 @@ export default function SetupWizard() {
                   <button
                     type="button"
                     onClick={() => setSelectedExpansion('cata')}
-                    className={`relative rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                    className={`relative rounded-lg border-2 transition-all hover:scale-[1.02] p-3 flex items-center justify-center bg-black/20 ${
                       selectedExpansion === 'cata' ? 'border-primary ring-2 ring-primary' : 'border-border'
                     }`}
                   >
                     <img
                       src="/logos/expansions/cata.png"
                       alt="Cataclysm"
-                      className="w-full h-auto aspect-video object-cover"
+                      className="h-16 w-auto object-contain"
                     />
                     {selectedExpansion === 'cata' && (
-                      <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-                        <div className="bg-primary text-primary-foreground rounded-full p-2">
-                          <CheckCircle2 className="h-8 w-8" />
-                        </div>
+                      <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-1">
+                        <CheckCircle2 className="h-4 w-4" />
                       </div>
                     )}
                   </button>
