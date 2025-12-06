@@ -55,7 +55,7 @@ export const CLASSIC_ATTUNEMENTS: Attunement[] = [
   { name: 'bwl', displayName: 'Blackwing Lair', released: true, color: '#C41F3B' },
   { name: 'aq20', displayName: 'AQ20', released: true, color: '#FFD700' },
   { name: 'aq40', displayName: 'AQ40', released: true, color: '#FF8C00' },
-  { name: 'naxx', displayName: 'Naxxramas', released: false, color: '#00FFBA' },
+  { name: 'naxx', displayName: 'Naxxramas', released: true, color: '#00FFBA' },
 ];
 
 /**

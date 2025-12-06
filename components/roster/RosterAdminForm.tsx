@@ -59,6 +59,10 @@ import type { RoleType, ExtraRoleType } from '@/lib/types/roles.types';
 import type { Profession } from '@/lib/types/professions.types';
 import { createRosterMember, updateRosterMember, deleteRosterMember } from '@/lib/firebase/roster';
 import { toastSuccess, toastError } from '@/lib/utils/toast';
+import { ClassIcon } from '@/components/wow/ClassIcon';
+import { SpecIcon } from '@/components/wow/SpecIcon';
+import { RoleIcon } from '@/components/wow/RoleIcon';
+import { ProfessionIcon } from '@/components/wow/ProfessionIcon';
 
 interface RosterAdminFormProps {
   isOpen: boolean;
@@ -81,14 +85,11 @@ export function RosterAdminForm({
 
   // Form state
   const [name, setName] = useState('');
-  const [playerName, setPlayerName] = useState('');
   const [rank, setRank] = useState<string>('Core');
   const [className, setClassName] = useState<ClassType>('Warrior');
   const [spec, setSpec] = useState('');
   const [offSpec, setOffSpec] = useState('');
   const [role, setRole] = useState<RoleType | ''>('');
-  const [level, setLevel] = useState('60');
-  const [gearScore, setGearScore] = useState('');
   const [attunements, setAttunements] = useState(initializeAttunements());
   const [professions, setProfessions] = useState<ProfessionEntry[]>([]);
   const [extraRoles, setExtraRoles] = useState<ExtraRoleType[]>([]);
@@ -99,14 +100,11 @@ export function RosterAdminForm({
   useEffect(() => {
     if (editingMember) {
       setName(editingMember.name);
-      setPlayerName(editingMember.playerName || '');
       setRank(editingMember.rank);
       setClassName(editingMember.class);
       setSpec(editingMember.spec || '');
       setOffSpec(editingMember.offSpec || '');
       setRole(editingMember.role || '');
-      setLevel(editingMember.level?.toString() || '60');
-      setGearScore(editingMember.gearInfo?.gearScore?.toString() || '');
       setAttunements(editingMember.attunements || initializeAttunements());
       setProfessions(editingMember.professions || []);
       setExtraRoles(editingMember.extraRoles || []);
@@ -121,14 +119,11 @@ export function RosterAdminForm({
 
   const resetForm = () => {
     setName('');
-    setPlayerName('');
     setRank('Core');
     setClassName('Warrior');
     setSpec('');
     setOffSpec('');
     setRole('');
-    setLevel('60');
-    setGearScore('');
     setAttunements(initializeAttunements());
     setProfessions([]);
     setExtraRoles([]);
@@ -212,16 +207,11 @@ export function RosterAdminForm({
     try {
       const memberData: CreateRosterMember = {
         name: name.trim(),
-        playerName: playerName.trim() || undefined,
         rank: rank as CreateRosterMember['rank'],
         class: className,
         spec: spec || undefined,
         offSpec: offSpec || undefined,
         role: role || undefined,
-        level: level ? Number(level) : undefined,
-        gearInfo: gearScore
-          ? { gearScore: Number(gearScore) }
-          : undefined,
         attunements,
         professions,
         extraRoles: extraRoles.length > 0 ? extraRoles : undefined,
@@ -335,33 +325,6 @@ export function RosterAdminForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="playerName">Player Name</Label>
-                <Input
-                  id="playerName"
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="Player's real name"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="class">Class *</Label>
-                <Select value={className} onValueChange={handleClassChange}>
-                  <SelectTrigger id="class">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CLASSES.map((cls) => (
-                      <SelectItem key={cls} value={cls}>
-                        {cls}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="rank">Rank *</Label>
                 <Select value={rank} onValueChange={setRank}>
                   <SelectTrigger id="rank">
@@ -380,15 +343,76 @@ export function RosterAdminForm({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="spec">Main Spec</Label>
-                <Select value={spec} onValueChange={handleSpecChange}>
-                  <SelectTrigger id="spec">
-                    <SelectValue placeholder="Select spec" />
+                <Label htmlFor="class">Class *</Label>
+                <Select value={className} onValueChange={handleClassChange}>
+                  <SelectTrigger id="class">
+                    <div className="flex items-center gap-2">
+                      <ClassIcon className={className} variant="icon" size="sm" />
+                      <span>{className}</span>
+                    </div>
                   </SelectTrigger>
                   <SelectContent>
+                    {CLASSES.map((cls) => (
+                      <SelectItem key={cls} value={cls}>
+                        <div className="flex items-center gap-2">
+                          <ClassIcon className={cls} variant="icon" size="sm" />
+                          <span>{cls}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="role">Raid Role</Label>
+                <Select value={role || "none"} onValueChange={(v) => setRole(v === "none" ? "" : v as RoleType)}>
+                  <SelectTrigger id="role">
+                    {role ? (
+                      <div className="flex items-center gap-2">
+                        <RoleIcon role={role} variant="icon" size="sm" />
+                        <span>{role}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">Select role</span>
+                    )}
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {availableRoles.map((r) => (
+                      <SelectItem key={r} value={r}>
+                        <div className="flex items-center gap-2">
+                          <RoleIcon role={r} variant="icon" size="sm" />
+                          <span>{r}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="spec">Main Spec</Label>
+                <Select value={spec || "none"} onValueChange={(v) => handleSpecChange(v === "none" ? "" : v)}>
+                  <SelectTrigger id="spec">
+                    {spec ? (
+                      <div className="flex items-center gap-2">
+                        <SpecIcon className={className} spec={spec} size="sm" />
+                        <span>{spec}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">Select spec</span>
+                    )}
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
                     {availableSpecs.map((s) => (
                       <SelectItem key={s} value={s}>
-                        {s}
+                        <div className="flex items-center gap-2">
+                          <SpecIcon className={className} spec={s} size="sm" />
+                          <span>{s}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -398,56 +422,27 @@ export function RosterAdminForm({
                 <Label htmlFor="offSpec">Off Spec</Label>
                 <Select value={offSpec || "none"} onValueChange={(v) => setOffSpec(v === "none" ? "" : v)}>
                   <SelectTrigger id="offSpec">
-                    <SelectValue placeholder="Select off spec" />
+                    {offSpec ? (
+                      <div className="flex items-center gap-2">
+                        <SpecIcon className={className} spec={offSpec} size="sm" />
+                        <span>{offSpec}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">Select off spec</span>
+                    )}
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None</SelectItem>
                     {availableSpecs.map((s) => (
                       <SelectItem key={s} value={s}>
-                        {s}
+                        <div className="flex items-center gap-2">
+                          <SpecIcon className={className} spec={s} size="sm" />
+                          <span>{s}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="role">Raid Role</Label>
-                <Select value={role} onValueChange={(v) => setRole(v as RoleType)}>
-                  <SelectTrigger id="role">
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableRoles.map((r) => (
-                      <SelectItem key={r} value={r}>
-                        {r}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="level">Level</Label>
-                <Input
-                  id="level"
-                  type="number"
-                  min="1"
-                  max="60"
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="gearScore">Gear Score</Label>
-                <Input
-                  id="gearScore"
-                  type="number"
-                  value={gearScore}
-                  onChange={(e) => setGearScore(e.target.value)}
-                  placeholder="Optional"
-                />
               </div>
             </div>
           </TabsContent>
@@ -506,12 +501,18 @@ export function RosterAdminForm({
                       }
                     >
                       <SelectTrigger className="flex-1">
-                        <SelectValue />
+                        <div className="flex items-center gap-2">
+                          <ProfessionIcon profession={prof.profession} size="sm" />
+                          <span>{prof.profession}</span>
+                        </div>
                       </SelectTrigger>
                       <SelectContent>
                         {PROFESSIONS.map((p) => (
                           <SelectItem key={p} value={p}>
-                            {p}
+                            <div className="flex items-center gap-2">
+                              <ProfessionIcon profession={p} size="sm" />
+                              <span>{p}</span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
