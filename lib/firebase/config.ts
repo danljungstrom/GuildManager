@@ -21,17 +21,36 @@ function initializeFirebase() {
   }
 
   if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-    console.warn('Firebase config missing - apiKey or projectId not set');
+    console.warn(
+      '⚠️ Firebase configuration missing.\n' +
+      'Please ensure all required Firebase environment variables are set:\n' +
+      '- NEXT_PUBLIC_FIREBASE_API_KEY\n' +
+      '- NEXT_PUBLIC_FIREBASE_PROJECT_ID\n' +
+      '- NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN\n' +
+      '- NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET\n' +
+      '- NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID\n' +
+      '- NEXT_PUBLIC_FIREBASE_APP_ID\n\n' +
+      'Check your environment variables in Vercel or your hosting platform.'
+    );
     return { app: undefined, db: undefined };
   }
 
-  if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApps()[0];
+  try {
+    if (!getApps().length) {
+      app = initializeApp(firebaseConfig);
+    } else {
+      app = getApps()[0];
+    }
+    db = getFirestore(app);
+
+    if (process.env.NODE_ENV === 'development') {
+      console.info('✅ Firebase initialized successfully');
+    }
+  } catch (error) {
+    console.error('❌ Failed to initialize Firebase:', error);
+    return { app: undefined, db: undefined };
   }
-  db = getFirestore(app);
-  
+
   return { app, db };
 }
 

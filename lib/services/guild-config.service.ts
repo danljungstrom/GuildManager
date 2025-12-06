@@ -1,6 +1,6 @@
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { GuildConfig, DEFAULT_DISCORD_SETTINGS } from '@/lib/types/guild-config.types';
+import { GuildConfig, DEFAULT_DISCORD_SETTINGS, WoWExpansion } from '@/lib/types/guild-config.types';
 import { FIRESTORE_PATHS } from '@/lib/constants/firestore-paths';
 import { getThemePreset } from '@/lib/constants/theme-presets';
 
@@ -10,6 +10,7 @@ import { getThemePreset } from '@/lib/constants/theme-presets';
  */
 export interface GuildConfigInput {
   name: string;
+  expansion?: WoWExpansion;
   themePresetId: string;
   ownerId?: string; // Discord user ID of the site owner
 }
@@ -19,7 +20,6 @@ export interface GuildConfigInput {
  */
 export async function getGuildConfig(): Promise<GuildConfig | null> {
   if (!db) {
-    console.warn('Firestore not initialized. Please check your .env.local file.');
     return null;
   }
 
@@ -45,7 +45,7 @@ export async function initializeGuildConfig(
   input: GuildConfigInput
 ): Promise<GuildConfig> {
   if (!db) {
-    throw new Error('Firestore not initialized. Please check your .env.local file and ensure Firebase is configured correctly.');
+    throw new Error('Firebase is not configured. Please add your Firebase credentials to .env.local (see .env.example for required variables).');
   }
 
   // Get the selected theme preset
@@ -60,6 +60,7 @@ export async function initializeGuildConfig(
     id: 'guild',
     metadata: {
       name: input.name,
+      expansion: input.expansion || 'classic',
       // Other metadata fields are optional and can be set later in admin settings
     },
     theme: {
@@ -101,7 +102,7 @@ export async function updateGuildConfig(
   updates: Partial<Omit<GuildConfig, 'id' | 'createdAt'>>
 ): Promise<void> {
   if (!db) {
-    throw new Error('Firestore not initialized. Please check your .env.local file.');
+    throw new Error('Firebase is not configured. Please add your Firebase credentials to .env.local.');
   }
 
   try {

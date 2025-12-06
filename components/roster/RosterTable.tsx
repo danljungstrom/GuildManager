@@ -100,16 +100,6 @@ function RosterTableRow({ member, onSelect }: RosterTableRowProps) {
           )}
         </TableCell>
 
-        {/* Level */}
-        <TableCell className="w-[60px] text-center">
-          {member.level || '-'}
-        </TableCell>
-
-        {/* Gear Score */}
-        <TableCell className="w-[60px] text-center">
-          {member.gearInfo?.gearScore || '-'}
-        </TableCell>
-
         {/* Attendance */}
         <TableCell className="w-[110px]">
           {member.attendance ? (
@@ -133,7 +123,7 @@ function RosterTableRow({ member, onSelect }: RosterTableRowProps) {
       {/* Expanded Row Details */}
       {isExpanded && (
         <TableRow className="hover:bg-transparent">
-          <TableCell colSpan={9} className="p-0 border-0">
+          <TableCell colSpan={7} className="p-0 border-0">
             <div className="p-4 bg-muted/30 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Player Info */}
@@ -279,7 +269,7 @@ export function RosterTable() {
 
   return (
     <div className="rounded-md border overflow-x-auto">
-      <Table className="table-fixed min-w-[900px]">
+      <Table className="table-fixed min-w-[780px]">
         <TableHeader>
           <TableRow>
             <TableHead className="w-[50px]"></TableHead>
@@ -315,26 +305,6 @@ export function RosterTable() {
             </TableHead>
             <TableHead className="w-[90px] text-left">Role</TableHead>
             <TableHead className="w-[120px] text-left">Spec</TableHead>
-            <TableHead className="w-[60px] text-center">
-              <Button
-                variant="ghost"
-                onClick={() => handleSort('level')}
-                className="flex items-center justify-center p-0 h-auto font-semibold hover:bg-transparent"
-              >
-                Level
-                {getSortIcon('level')}
-              </Button>
-            </TableHead>
-            <TableHead className="w-[60px] text-center">
-              <Button
-                variant="ghost"
-                onClick={() => handleSort('gearScore')}
-                className="flex items-center justify-center p-0 h-auto font-semibold hover:bg-transparent"
-              >
-                GS
-                {getSortIcon('gearScore')}
-              </Button>
-            </TableHead>
             <TableHead className="w-[110px] text-left">
               <Button
                 variant="ghost"

@@ -5,9 +5,14 @@ import { CLASSES } from '@/lib/consts/classes';
 import type { RoleType } from '@/lib/types/roles.types';
 
 /**
- * Type-safe class type derived from CLASSES array
+ * All possible WoW classes across all expansions
  */
-export type ClassType = (typeof CLASSES)[number];
+export type ClassType =
+  | (typeof CLASSES)[number]
+  | 'Death Knight' // WotLK+
+  | 'Demon Hunter' // Legion+
+  | 'Monk' // MoP+
+  | 'Evoker'; // Dragonflight+
 
 export interface ClassSpecConfig {
   name: string;

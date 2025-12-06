@@ -10,6 +10,8 @@ export type Profession =
   | 'Engineering'
   | 'Fishing'
   | 'Herbalism'
+  | 'Inscription'
+  | 'Jewelcrafting'
   | 'Leatherworking'
   | 'Mining'
   | 'Skinning'

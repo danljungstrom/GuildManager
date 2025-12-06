@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { initializeGuildConfig } from '@/lib/services/guild-config.service';
 import { getAllThemePresets } from '@/lib/constants/theme-presets';
 import { getThemeIcon } from '@/lib/constants/theme-icons';
@@ -14,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AlertCircle, CheckCircle2, LogOut } from 'lucide-react';
 import { toastSuccess, toastError } from '@/lib/utils/toast';
+import type { WoWExpansion } from '@/lib/types/guild-config.types';
 
 // Discord icon component
 function DiscordIcon({ className }: { className?: string }) {
@@ -39,6 +41,7 @@ export default function SetupWizard() {
 
   const [guildName, setGuildName] = useState('');
   const [nameFieldTouched, setNameFieldTouched] = useState(false);
+  const [selectedExpansion, setSelectedExpansion] = useState<WoWExpansion>('classic');
   const [selectedThemeId, setSelectedThemeId] = useState('spartan');
   const [nameError, setNameError] = useState('');
 
@@ -103,6 +106,7 @@ export default function SetupWizard() {
       // Include the owner's Discord ID in the config
       await initializeGuildConfig({
         name: guildName,
+        expansion: selectedExpansion,
         themePresetId: selectedThemeId,
         ownerId: user?.id, // Set the current user as owner
       });
@@ -144,6 +148,7 @@ export default function SetupWizard() {
             <div className={`flex-1 h-2 rounded ${step >= 1 ? 'bg-primary' : 'bg-muted'}`} />
             <div className={`flex-1 h-2 rounded ${step >= 2 ? 'bg-primary' : 'bg-muted'}`} />
             <div className={`flex-1 h-2 rounded ${step >= 3 ? 'bg-primary' : 'bg-muted'}`} />
+            <div className={`flex-1 h-2 rounded ${step >= 4 ? 'bg-primary' : 'bg-muted'}`} />
           </div>
 
           {error && (
@@ -235,7 +240,7 @@ export default function SetupWizard() {
                 <h2 className="text-xl font-semibold mb-2 font-heading">What&apos;s your guild name?</h2>
                 <p className="text-sm text-muted-foreground">
                   This is a quick setup to get you started. You can configure additional details like
-                  server, region, faction, and expansion later in admin settings.
+                  server, region, and faction later in admin settings.
                 </p>
               </div>
 
@@ -271,8 +276,47 @@ export default function SetupWizard() {
             </div>
           )}
 
-          {/* Step 2: Theme Selection */}
+          {/* Step 2: Expansion Selection */}
           {step === 2 && (
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-xl font-semibold mb-2 font-heading">Which expansion?</h2>
+                <p className="text-sm text-muted-foreground">
+                  Select your WoW expansion. This determines available classes, raids, and profession caps.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="expansion" className="font-heading">Expansion</Label>
+                <Select value={selectedExpansion} onValueChange={(value) => setSelectedExpansion(value as WoWExpansion)}>
+                  <SelectTrigger id="expansion">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="classic">Classic</SelectItem>
+                    <SelectItem value="tbc">The Burning Crusade</SelectItem>
+                    <SelectItem value="wotlk">Wrath of the Lich King</SelectItem>
+                    <SelectItem value="cata">Cataclysm</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  You can change this later in admin settings if needed.
+                </p>
+              </div>
+
+              <div className="flex justify-between gap-2 pt-4">
+                <Button variant="outline" onClick={() => setStep(1)}>
+                  Back
+                </Button>
+                <Button onClick={() => setStep(3)}>
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Theme Selection */}
+          {step === 3 && (
             <div className="space-y-4">
               <div>
                 <h2 className="text-xl font-semibold mb-2 font-heading">Choose a theme</h2>
@@ -324,18 +368,18 @@ export default function SetupWizard() {
               </div>
 
               <div className="flex justify-between gap-2 pt-4">
-                <Button variant="outline" onClick={() => setStep(1)}>
+                <Button variant="outline" onClick={() => setStep(2)}>
                   Back
                 </Button>
-                <Button onClick={() => setStep(3)}>
+                <Button onClick={() => setStep(4)}>
                   Next
                 </Button>
               </div>
             </div>
           )}
 
-          {/* Step 3: Confirmation */}
-          {step === 3 && (
+          {/* Step 4: Confirmation */}
+          {step === 4 && (
             <div className="space-y-4">
               <div>
                 <h2 className="text-xl font-semibold mb-2 font-heading">Ready to launch!</h2>
@@ -349,6 +393,16 @@ export default function SetupWizard() {
                   <div>
                     <Label className="text-muted-foreground font-heading">Guild Name</Label>
                     <p className="text-lg font-semibold font-heading">{guildName}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-muted-foreground font-heading">Expansion</Label>
+                    <p className="text-lg font-semibold">
+                      {selectedExpansion === 'classic' && 'Classic'}
+                      {selectedExpansion === 'tbc' && 'The Burning Crusade'}
+                      {selectedExpansion === 'wotlk' && 'Wrath of the Lich King'}
+                      {selectedExpansion === 'cata' && 'Cataclysm'}
+                    </p>
                   </div>
 
                   <div>
@@ -386,7 +440,7 @@ export default function SetupWizard() {
               </Card>
 
               <div className="flex justify-between gap-2 pt-4">
-                <Button variant="outline" onClick={() => setStep(2)}>
+                <Button variant="outline" onClick={() => setStep(3)}>
                   Back
                 </Button>
                 <Button onClick={handleComplete} disabled={loading} size="lg">

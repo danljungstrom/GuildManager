@@ -355,8 +355,12 @@ export default function AdminSettingsPage() {
                       <SelectItem value="classic">Classic</SelectItem>
                       <SelectItem value="tbc">The Burning Crusade</SelectItem>
                       <SelectItem value="wotlk">Wrath of the Lich King</SelectItem>
+                      <SelectItem value="cata">Cataclysm</SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-muted-foreground">
+                    This determines available classes, raids, and profession caps throughout the site.
+                  </p>
                 </div>
               </CardContent>
             </Card>

@@ -42,16 +42,6 @@ export const navigationItems: NavItem[] = [
     icon: Users,
     children: [
       {
-        label: "All Members",
-        href: "/roster",
-        icon: Users,
-      },
-      {
-        label: "By Class/Role",
-        href: "/roster/by-class",
-        icon: Users,
-      },
-      {
         label: "Professions",
         href: "/roster/professions",
         icon: Users,
