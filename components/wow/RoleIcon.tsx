@@ -18,9 +18,9 @@ export interface RoleIconProps {
 }
 
 const sizeClasses = {
-  sm: 'w-7 h-7',
-  md: 'w-9 h-9',
-  lg: 'w-14 h-14',
+  sm: 'w-6 h-6',
+  md: 'w-8 h-8',
+  lg: 'w-12 h-12',
 };
 
 const textSizeClasses = {
@@ -56,7 +56,7 @@ export function RoleIcon({
               alt={role}
               fill
               className="object-cover"
-              sizes={size === 'sm' ? '28px' : size === 'md' ? '36px' : '56px'}
+              sizes={size === 'sm' ? '24px' : size === 'md' ? '32px' : '48px'}
             />
           ) : (
             <div

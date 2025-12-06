@@ -18,6 +18,7 @@ import { RosterSearch } from '@/components/roster/RosterSearch';
 import { RosterFilters } from '@/components/roster/RosterFilters';
 import { RosterTable } from '@/components/roster/RosterTable';
 import { getAllRosterMembers } from '@/lib/firebase/roster';
+import type { RosterMember } from '@/lib/types/roster.types';
 import { getClassColor } from '@/lib/consts/classes';
 import { getRoleColor } from '@/lib/consts/roles';
 import type { ClassType } from '@/lib/types/classes.types';
@@ -76,6 +77,13 @@ export default function RosterPage() {
   const handleAddMember = () => {
     setEditingMemberId(null);
     setIsAdminFormOpen(true);
+  };
+
+  const handleEditMember = (member: RosterMember) => {
+    if (member.id) {
+      setEditingMemberId(member.id);
+      setIsAdminFormOpen(true);
+    }
   };
 
   const handleCloseAdminForm = () => {
@@ -153,7 +161,10 @@ export default function RosterPage() {
               <Skeleton className="h-12 w-full" />
             </div>
           ) : (
-            <RosterTable />
+            <RosterTable
+              isEditMode={isEditMode}
+              onEditMember={handleEditMember}
+            />
           )}
         </CardContent>
       </Card>

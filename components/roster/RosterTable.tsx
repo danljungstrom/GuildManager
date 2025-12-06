@@ -8,7 +8,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react';
+import { ChevronDown, ChevronRight, ArrowUp, ArrowDown, Pencil } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -29,9 +29,11 @@ import type { RosterMember, RosterSortField } from '@/lib/types/roster.types';
 interface RosterTableRowProps {
   member: RosterMember;
   onSelect: (member: RosterMember) => void;
+  isEditMode?: boolean;
+  onEdit?: (member: RosterMember) => void;
 }
 
-function RosterTableRow({ member, onSelect }: RosterTableRowProps) {
+function RosterTableRow({ member, onSelect, isEditMode, onEdit }: RosterTableRowProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleToggleExpand = (e: React.MouseEvent) => {
@@ -118,12 +120,30 @@ function RosterTableRow({ member, onSelect }: RosterTableRowProps) {
             <span className="text-muted-foreground text-sm">-</span>
           )}
         </TableCell>
+
+        {/* Edit Button (only in edit mode) */}
+        {isEditMode && (
+          <TableCell className="w-[60px]">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(member);
+              }}
+              title="Edit member"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </TableCell>
+        )}
       </TableRow>
 
       {/* Expanded Row Details */}
       {isExpanded && (
         <TableRow className="hover:bg-transparent">
-          <TableCell colSpan={7} className="p-0 border-0">
+          <TableCell colSpan={isEditMode ? 8 : 7} className="p-0 border-0">
             <div className="p-4 bg-muted/30 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Player Info */}
@@ -227,7 +247,12 @@ function RosterTableRow({ member, onSelect }: RosterTableRowProps) {
   );
 }
 
-export function RosterTable() {
+interface RosterTableProps {
+  isEditMode?: boolean;
+  onEditMember?: (member: RosterMember) => void;
+}
+
+export function RosterTable({ isEditMode, onEditMember }: RosterTableProps) {
   const filteredMembers = useRosterStore((state) => state.filteredMembers);
   const setSelectedMember = useRosterStore((state) => state.setSelectedMember);
   const sort = useRosterStore((state) => state.sort);
@@ -269,7 +294,7 @@ export function RosterTable() {
 
   return (
     <div className="rounded-md border overflow-x-auto">
-      <Table className="table-fixed min-w-[780px]">
+      <Table className={`table-fixed ${isEditMode ? 'min-w-[840px]' : 'min-w-[780px]'}`}>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[50px]"></TableHead>
@@ -315,6 +340,7 @@ export function RosterTable() {
                 {getSortIcon('attendance')}
               </Button>
             </TableHead>
+            {isEditMode && <TableHead className="w-[60px]"></TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -323,6 +349,8 @@ export function RosterTable() {
               key={member.id}
               member={member}
               onSelect={handleRowClick}
+              isEditMode={isEditMode}
+              onEdit={onEditMember}
             />
           ))}
         </TableBody>
