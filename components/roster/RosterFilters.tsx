@@ -73,7 +73,7 @@ export function RosterFilters() {
             >
               <ClassIcon
                 className={className}
-                variant="icon"
+                variant="both"
                 size="sm"
                 showText
               />
@@ -110,7 +110,7 @@ export function RosterFilters() {
               checked={filters.roles.includes(role)}
               onCheckedChange={() => toggleRoleFilter(role)}
             >
-              <RoleIcon role={role} variant="icon" size="sm" showText />
+              <RoleIcon role={role} variant="both" size="sm" showText />
             </DropdownMenuCheckboxItem>
           ))}
         </DropdownMenuContent>
