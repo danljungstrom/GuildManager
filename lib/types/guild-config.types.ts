@@ -22,6 +22,8 @@ export interface DiscordSettings {
   roleMappings: RoleMapping[];
   // Owner is the person who set up the site - always has SuperAdmin
   ownerId?: string; // Discord user ID of the site owner
+  // Access control
+  requireDiscordMembership?: boolean; // If true, users must be in the Discord server to access the site
 }
 
 /**
@@ -122,12 +124,33 @@ export interface LogoConfig {
 }
 
 /**
+ * Saved custom theme created by user
+ */
+export interface SavedCustomTheme {
+  id: string; // Unique identifier
+  name: string; // User-defined name
+  basePreset: string; // Which preset it was based on
+  colors: {
+    primary: string;
+    secondary: string;
+    background: string;
+    sidebar?: string; // Sidebar color (defaults to darkened background)
+  };
+  headingFont: string; // Font ID (e.g., 'spartan', 'horde')
+  bodyFont: string; // Font ID (e.g., 'lexend', 'raleway')
+  logoConfig?: LogoConfig; // Logo settings for this theme
+  createdAt: string; // ISO timestamp
+}
+
+/**
  * Theme configuration including colors and styling preferences
  */
 export interface ThemeConfig {
   colors: ThemeColors;
   typography?: ThemeTypography; // Optional typography configuration
   darkMode?: boolean;
+  preset?: string; // Active preset ID or saved custom theme ID
+  customThemes?: SavedCustomTheme[]; // User-saved custom themes
   // Legacy logo fields (for backwards compatibility)
   logo?: string;
   logoType?: 'theme-icon' | 'custom-image';

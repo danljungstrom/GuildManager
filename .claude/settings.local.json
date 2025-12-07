@@ -21,7 +21,8 @@
       "WebSearch",
       "mcp__playwright__*",
       "Bash(cat:*)",
-      "WebFetch(domain:game-icons.net)"
+      "WebFetch(domain:game-icons.net)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

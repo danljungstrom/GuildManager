@@ -51,6 +51,24 @@ export const THEME_ICONS: Record<string, ThemeIcon> = {
     name: 'Frost',
     svg: '/icons/theme-icons/frostfire.svg',
   },
+
+  holy: {
+    id: 'holy',
+    name: 'Holy',
+    svg: '/icons/game-icons.net/lorc/spiked-halo.svg',
+  },
+
+  ember: {
+    id: 'ember',
+    name: 'Ember',
+    svg: '/icons/game-icons.net/lorc/burning-embers.svg',
+  },
+
+  custom: {
+    id: 'custom',
+    name: 'Bland',
+    svg: '/icons/game-icons.net/lorc/crystal-shine.svg',
+  },
 };
 
 /**

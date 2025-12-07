@@ -4,89 +4,18 @@ import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Library, Upload, Palette, X, History, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { hslToHex, hexToHsl } from '@/lib/utils/color-conversion';
 import type { LogoConfig, LogoShape, LogoFrame, LogoGlow, LogoHistoryEntry, CropSettings } from '@/lib/types/guild-config.types';
 import { getThemeIcon } from '@/lib/constants/theme-icons';
 import { useThemeStore } from '@/lib/stores/theme-store';
 import { IconLibraryPicker } from './IconLibraryPicker';
 import { LogoUploader } from './LogoUploader';
 import { ImageCropEditor } from './ImageCropEditor';
-import { LogoPreview, FRAME_OPTIONS, SHAPE_OPTIONS, GLOW_OPTIONS, THEME_COLOR_MARKER } from './LogoPreview';
-
-// Helper functions to convert between HSL and Hex
-function hslToHex(hsl: string): string {
-  try {
-    const parts = hsl.trim().split(/\s+/);
-    if (parts.length < 3) return '#888888';
-
-    const h = parseFloat(parts[0]) / 360;
-    const s = parseFloat(parts[1].replace('%', '')) / 100;
-    const l = parseFloat(parts[2].replace('%', '')) / 100;
-
-    const hue2rgb = (p: number, q: number, t: number) => {
-      if (t < 0) t += 1;
-      if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-      return p;
-    };
-
-    let r, g, b;
-    if (s === 0) {
-      r = g = b = l;
-    } else {
-      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-      const p = 2 * l - q;
-      r = hue2rgb(p, q, h + 1/3);
-      g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1/3);
-    }
-
-    const toHex = (x: number) => {
-      const hex = Math.round(x * 255).toString(16);
-      return hex.length === 1 ? '0' + hex : hex;
-    };
-
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-  } catch {
-    return '#888888';
-  }
-}
-
-function hexToHsl(hex: string): string {
-  try {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    if (!result) return '0 0% 50%';
-
-    const r = parseInt(result[1], 16) / 255;
-    const g = parseInt(result[2], 16) / 255;
-    const b = parseInt(result[3], 16) / 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h = 0, s = 0;
-    const l = (max + min) / 2;
-
-    if (max !== min) {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-        case g: h = ((b - r) / d + 2) / 6; break;
-        case b: h = ((r - g) / d + 4) / 6; break;
-      }
-    }
-
-    return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
-  } catch {
-    return '0 0% 50%';
-  }
-}
+import { LogoPreview, FRAME_OPTIONS, GLOW_OPTIONS, THEME_COLOR_MARKER } from './LogoPreview';
 
 // Default colors for each frame type
 const FRAME_DEFAULT_COLORS: Record<string, string> = {
@@ -265,21 +194,20 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
   const showIconColorPicker = config.type !== 'none' && config.type !== 'custom-image';
   const showFrameColorPicker = config.frame && config.frame !== 'none';
 
+  // For theme-icon type, dynamically use the current theme's icon
+  // This ensures the preview updates when switching themes
+  const effectiveConfig = config.type === 'theme-icon'
+    ? { ...config, path: activePresetId }
+    : config;
+
   return (
     <div className="space-y-6">
       {/* Current Logo Preview & Source Selection */}
-      <Card>
-        <CardHeader className="pb-6">
-          <CardTitle>Guild Logo</CardTitle>
-          <CardDescription>
-            Your logo appears in the sidebar and throughout the site
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-start gap-6 pb-5" >
+      <div>
+        <div className="flex items-start gap-6 pb-5 mt-5">
             {/* Preview */}
             <div className="flex flex-col items-center gap-2">
-              <LogoPreview config={config} size="xl" />
+              <LogoPreview config={effectiveConfig} size="xl" />
               {config.type === 'library-icon' && config.artist && (
                 <p className="text-xs text-muted-foreground">
                   by <span className="text-foreground">{config.artist}</span>
@@ -367,21 +295,27 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
 
               {/* Icon Color Options - below source selection */}
               {showIconColorPicker && (
-                <div className="flex items-center gap-3">
-                  <Label className="text-sm font-medium">Icon Color</Label>
-                  <div className="flex gap-2">
+                <div className="flex items-center gap-3" role="group" aria-label="Icon color options">
+                  <Label className="text-sm font-medium" id="icon-color-label">Icon Color</Label>
+                  <div className="flex gap-2" role="radiogroup" aria-labelledby="icon-color-label">
                     <button
                       type="button"
+                      role="radio"
+                      aria-checked={iconColorMode === 'theme'}
+                      aria-label="Use theme color for icon"
                       onClick={() => handleIconColorChange(undefined)}
                       className={cn(
                         'flex items-center gap-2 px-3 py-1.5 rounded border cursor-pointer transition-colors',
                         iconColorMode === 'theme' ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted'
                       )}
                     >
-                      <div className="w-4 h-4 rounded bg-primary" />
+                      <div className="w-4 h-4 rounded bg-primary" aria-hidden="true" />
                       <span className="text-xs">Theme</span>
                     </button>
                     <label
+                      role="radio"
+                      aria-checked={iconColorMode === 'custom'}
+                      aria-label={`Use custom color for icon: ${hslToHex(customIconColor)}`}
                       onClick={() => {
                         // Select custom mode when clicking the label
                         if (iconColorMode !== 'custom') {
@@ -396,6 +330,7 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
                       <input
                         type="color"
                         value={hslToHex(customIconColor)}
+                        aria-label="Choose custom icon color"
                         onChange={(e) => {
                           const hsl = hexToHsl(e.target.value);
                           setCustomIconColor(hsl);
@@ -406,6 +341,7 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
                       <div
                         className="w-4 h-4 rounded border"
                         style={{ backgroundColor: `hsl(${customIconColor})` }}
+                        aria-hidden="true"
                       />
                       <span className="text-xs">Custom</span>
                     </label>
@@ -419,15 +355,16 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
           {(history.length > 0 || config.type !== 'none') && (
             <div className="flex items-center justify-between pt-4 border-t">
               {history.length > 0 ? (
-                <div className="flex items-center gap-3">
-                  <History className="h-4 w-4 text-muted-foreground" />
+                <nav className="flex items-center gap-3" aria-label="Logo history">
+                  <History className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                   <Label className="text-sm text-muted-foreground">Previous:</Label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2" role="list">
                     {history.map((entry, index) => (
                       <button
                         key={`${entry.path}-${entry.frame}-${index}`}
                         onClick={() => handleRevertToHistory(entry)}
                         className="opacity-70 hover:opacity-100 transition-opacity"
+                        aria-label={`Revert to previous logo ${index + 1}${entry.frame && entry.frame !== 'none' ? ` with ${entry.frame} frame` : ''}`}
                         title={`Revert to this logo${entry.frame && entry.frame !== 'none' ? ` (${entry.frame} frame)` : ''}`}
                       >
                         <LogoPreview
@@ -447,9 +384,9 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
                       </button>
                     ))}
                   </div>
-                </div>
+                </nav>
               ) : (
-                <div />
+                <div aria-hidden="true" />
               )}
               {config.type !== 'none' && (
                 <Button
@@ -464,22 +401,21 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
               )}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
 
       {/* Frame & Effects */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle>Frame & Effects</CardTitle>
-          <CardDescription>
+      <div className="pt-4 border-t">
+        <div className="mb-4">
+          <h4 className="text-sm font-medium">Frame & Effects</h4>
+          <p className="text-xs text-muted-foreground">
             Add a decorative frame and glow effects
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+          </p>
+        </div>
+        <div className="space-y-6">
           {/* Large Preview */}
           {config.type !== 'none' && config.path && (
             <div className="flex justify-center pb-2">
-              <LogoPreview config={config} size="xl" />
+              <LogoPreview config={effectiveConfig} size="xl" />
             </div>
           )}
 
@@ -568,7 +504,7 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
                     className="sr-only"
                   />
                   <LogoPreview
-                    config={{ ...config, frame: option.value, glow: 'none' }}
+                    config={{ ...effectiveConfig, frame: option.value, glow: 'none' }}
                     size="sm"
                   />
                   <span className="text-xs font-medium">{option.label}</span>
@@ -679,8 +615,8 @@ export function LogoSettings({ config, onChange }: LogoSettingsProps) {
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Attribution Note */}
       <Alert className="bg-muted/30 border-muted">

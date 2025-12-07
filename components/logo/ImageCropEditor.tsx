@@ -126,15 +126,26 @@ export function ImageCropEditor({
 
     // For SVG icons, render a colored div with the mask
     // Theme icons need to use getThemeIcon since path (preset ID) doesn't match filename
-    const iconPath = config.type === 'theme-icon'
-      ? (getThemeIcon(config.path || '')?.svg || `/icons/theme-icons/${config.path}.svg`)
-      : `/icons/game-icons.net/${config.path}.svg`;
+    let iconPath: string;
+    if (config.type === 'theme-icon') {
+      iconPath = getThemeIcon(config.path || '')?.svg || `/icons/theme-icons/${config.path}.svg`;
+    } else if (config.path?.startsWith('/')) {
+      // Full path (e.g., from saved custom theme that was originally a theme-icon)
+      iconPath = config.path;
+    } else {
+      // Relative path for library icons
+      iconPath = `/icons/game-icons.net/${config.path}.svg`;
+    }
+
+    // Use custom icon color if set, otherwise use primary
+    const iconColor = config.iconColor ? `hsl(${config.iconColor})` : undefined;
 
     return (
       <div
-        className="w-full h-full bg-primary"
+        className={cn('w-full h-full', !iconColor && 'bg-primary')}
         style={{
           ...transformStyle,
+          ...(iconColor && { backgroundColor: iconColor }),
           WebkitMask: `url(${iconPath}) center/contain no-repeat`,
           mask: `url(${iconPath}) center/contain no-repeat`,
         }}

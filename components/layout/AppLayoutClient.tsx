@@ -7,6 +7,7 @@ import { useGuild } from '@/lib/contexts/GuildContext';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { applyStoredTheme } from '@/lib/stores/theme-store';
+import { DiscordGate } from '@/components/auth/DiscordGate';
 import type { ThemeMode } from '@/lib/utils/theme-cookie';
 
 interface AppLayoutClientProps {
@@ -50,13 +51,15 @@ export function AppLayoutClient({ children, initialTheme }: AppLayoutClientProps
     );
   }
 
-  // Normal layout with sidebar
+  // Normal layout with sidebar and Discord membership check
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <main role="main" className="min-h-screen w-full">
-        {children}
-      </main>
-    </SidebarProvider>
+    <DiscordGate>
+      <SidebarProvider>
+        <AppSidebar />
+        <main role="main" className="min-h-screen w-full">
+          {children}
+        </main>
+      </SidebarProvider>
+    </DiscordGate>
   );
 }

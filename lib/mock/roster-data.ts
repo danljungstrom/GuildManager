@@ -325,10 +325,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     class: 'Warrior',
     spec: 'Fury',
     role: 'DPS',
-    level: 59,
-    gearInfo: {
-      gearScore: 410,
-    },
     attunements: {
       mc: true,
       onyxia: false,
@@ -348,7 +344,7 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
       lastRaid: '2024-11-28',
     },
     joinDate: '2024-10-15',
-    notes: 'Trial warrior. Needs more gear but good attitude.',
+    notes: 'Trial warrior. Good attitude.',
     createdAt: '2024-10-15T00:00:00Z',
     updatedAt: '2024-12-01T00:00:00Z',
   },
@@ -359,10 +355,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     class: 'Priest',
     spec: 'Shadow',
     role: 'DPS',
-    level: 60,
-    gearInfo: {
-      gearScore: 440,
-    },
     attunements: {
       mc: true,
       onyxia: true,
@@ -393,10 +385,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     class: 'Paladin',
     spec: 'Retribution',
     role: 'DPS',
-    level: 58,
-    gearInfo: {
-      gearScore: 395,
-    },
     attunements: {
       mc: false,
       onyxia: false,
@@ -416,7 +404,7 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
       lastRaid: '2024-10-20',
     },
     joinDate: '2024-09-01',
-    notes: 'Social member. Still leveling.',
+    notes: 'Social member.',
     createdAt: '2024-09-01T00:00:00Z',
     updatedAt: '2024-12-01T00:00:00Z',
   },
@@ -427,10 +415,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     class: 'Shaman',
     spec: 'Elemental',
     role: 'DPS',
-    level: 60,
-    gearInfo: {
-      gearScore: 458,
-    },
     attunements: {
       mc: true,
       onyxia: true,
@@ -460,10 +444,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     class: 'Druid',
     spec: 'Balance',
     role: 'DPS',
-    level: 60,
-    gearInfo: {
-      gearScore: 445,
-    },
     attunements: {
       mc: true,
       onyxia: true,

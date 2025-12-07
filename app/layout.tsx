@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import { Geist, Geist_Mono, Inter, Cinzel_Decorative, Metal_Mania, New_Rocker, Almendra_SC, Uncial_Antiqua, Wendy_One } from 'next/font/google';
+import { Geist, Geist_Mono, Inter, Cinzel_Decorative, Metal_Mania, New_Rocker, Almendra_SC, Uncial_Antiqua, Wendy_One, Grenze_Gotisch, Fascinate_Inline, Tilt_Prism, Lexend, Raleway, Montserrat, Open_Sans, Lato } from 'next/font/google';
 
 // Note: If fonts don't load, check Google Fonts API for exact names
 import './globals.css';
@@ -23,11 +23,46 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
 });
 
-// Body font - shared across all themes
+// Body fonts
 const bodyFont = Inter({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-body',
+  display: 'swap',
+});
+
+const lexendFont = Lexend({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-lexend',
+  display: 'swap',
+});
+
+const ralewayFont = Raleway({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-raleway',
+  display: 'swap',
+});
+
+const montserratFont = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-montserrat',
+  display: 'swap',
+});
+
+const openSansFont = Open_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-open-sans',
+  display: 'swap',
+});
+
+const latoFont = Lato({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-lato',
   display: 'swap',
 });
 
@@ -71,6 +106,27 @@ const frostHeading = Wendy_One({
   subsets: ['latin'],
   weight: ['400'],
   variable: '--font-heading-frost',
+  display: 'swap',
+});
+
+const holyHeading = Grenze_Gotisch({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-heading-holy',
+  display: 'swap',
+});
+
+const emberHeading = Fascinate_Inline({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-heading-ember',
+  display: 'swap',
+});
+
+const customHeading = Tilt_Prism({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-heading-custom',
   display: 'swap',
 });
 
@@ -125,15 +181,25 @@ export default async function RootLayout({
   return (
     <html lang="en" className={cn(
       theme, // Dynamic theme from cookie
+      // Body fonts
       bodyFont.variable,
+      lexendFont.variable,
+      ralewayFont.variable,
+      montserratFont.variable,
+      openSansFont.variable,
+      latoFont.variable,
+      geist.variable,
+      geistMono.variable,
+      // Heading fonts
       spartanHeading.variable,
       hordeHeading.variable,
       allianceHeading.variable,
       shadowHeading.variable,
       natureHeading.variable,
       frostHeading.variable,
-      geist.variable,
-      geistMono.variable
+      holyHeading.variable,
+      emberHeading.variable,
+      customHeading.variable,
     )}>
       <body className={cn('min-h-screen antialiased')}>
         <GuildProvider initialConfig={guildConfig}>

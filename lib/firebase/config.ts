@@ -37,14 +37,13 @@ function initializeFirebase() {
   try {
     if (!getApps().length) {
       app = initializeApp(firebaseConfig);
+      if (process.env.NODE_ENV === 'development') {
+        console.info('✅ Firebase initialized successfully');
+      }
     } else {
       app = getApps()[0];
     }
     db = getFirestore(app);
-
-    if (process.env.NODE_ENV === 'development') {
-      console.info('✅ Firebase initialized successfully');
-    }
   } catch (error) {
     console.error('❌ Failed to initialize Firebase:', error);
     return { app: undefined, db: undefined };

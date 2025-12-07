@@ -41,10 +41,16 @@ export function GuildLogo({ size = 'md', className }: GuildLogoProps) {
   const logoConfig = config?.theme.logoConfig;
 
   if (logoConfig && logoConfig.type !== 'none' && logoConfig.path) {
+    // For theme-icon type, dynamically use the current theme's icon
+    // This ensures the logo updates when switching themes
+    const effectiveConfig = logoConfig.type === 'theme-icon'
+      ? { ...logoConfig, path: activePresetId }
+      : logoConfig;
+
     // Use the new LogoPreview component for full logo config support
     return (
       <LogoPreview
-        config={logoConfig}
+        config={effectiveConfig}
         size={logoPreviewSizeMap[size]}
         className={className}
       />

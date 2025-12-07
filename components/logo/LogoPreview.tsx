@@ -1,7 +1,8 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { AlertCircle } from 'lucide-react';
 import type { LogoShape, LogoFrame, LogoGlow, LogoConfig } from '@/lib/types/guild-config.types';
 import { getThemeIcon } from '@/lib/constants/theme-icons';
 
@@ -20,20 +21,29 @@ interface LogoPreviewProps {
   className?: string;
 }
 
+/**
+ * Logo content size classes (Tailwind)
+ * Used for the inner logo/icon element
+ */
 const SIZE_MAP = {
-  xs: 'w-6 h-6',
-  sm: 'w-12 h-12',
-  md: 'w-20 h-20',
-  lg: 'w-32 h-32',
-  xl: 'w-48 h-48',
+  xs: 'w-6 h-6',    // 24px - Tiny inline use
+  sm: 'w-12 h-12',  // 48px - Thumbnails, list items
+  md: 'w-20 h-20',  // 80px - Cards, previews
+  lg: 'w-32 h-32',  // 128px - Large preview
+  xl: 'w-48 h-48',  // 192px - Full display, hero
 };
 
+/**
+ * Frame container size classes (Tailwind)
+ * Larger than content to accommodate decorative frames
+ * Ratio: ~1.17x the content size to allow frame details
+ */
 const FRAME_SIZE_MAP = {
-  xs: 'w-8 h-8',
-  sm: 'w-14 h-14',
-  md: 'w-24 h-24',
-  lg: 'w-40 h-40',
-  xl: 'w-56 h-56',
+  xs: 'w-8 h-8',    // 32px
+  sm: 'w-14 h-14',  // 56px
+  md: 'w-24 h-24',  // 96px
+  lg: 'w-40 h-40',  // 160px
+  xl: 'w-56 h-56',  // 224px
 };
 
 const SHAPE_CLASSES: Record<Exclude<LogoShape, 'none'>, string> = {
@@ -60,12 +70,17 @@ const PADDING_CLASSES: Record<'xs' | 'sm' | 'md' | 'lg' | 'xl', string> = {
   xl: 'p-3',
 };
 
-// Glow intensity mapping
+/**
+ * Glow effect intensity settings
+ * - blur: Gaussian blur radius in pixels for the glow spread
+ * - spread: Additional spread distance in pixels beyond the blur
+ * - opacity: Transparency of the glow (0-1)
+ */
 const GLOW_STYLES: Record<Exclude<LogoGlow, 'none'>, { blur: number; spread: number; opacity: number }> = {
-  soft: { blur: 12, spread: 2, opacity: 0.4 },
-  medium: { blur: 18, spread: 4, opacity: 0.55 },
-  intense: { blur: 28, spread: 8, opacity: 0.7 },
-  pulse: { blur: 20, spread: 5, opacity: 0.5 },
+  soft: { blur: 12, spread: 2, opacity: 0.4 },      // Subtle ambient glow
+  medium: { blur: 18, spread: 4, opacity: 0.55 },   // Balanced visibility
+  intense: { blur: 28, spread: 8, opacity: 0.7 },   // Strong highlight effect
+  pulse: { blur: 20, spread: 5, opacity: 0.5 },     // Animated pulsing glow
 };
 
 // Map frame types to their natural shape (for auto-clipping custom images)
@@ -82,21 +97,35 @@ const FRAME_NATURAL_SHAPE: Record<LogoFrame, Exclude<LogoShape, 'none'>> = {
 
 export function LogoPreview({ config, size = 'lg', className }: LogoPreviewProps) {
   const { type, path, shape = 'none', frame = 'none', iconColor, frameColor, glow = 'none', glowColor, cropSettings } = config;
+  const [imageError, setImageError] = useState(false);
+
+  // Reset error state when path changes
+  useEffect(() => {
+    setImageError(false);
+  }, [path]);
+
+  // Fallback UI for errors or missing content
+  const renderFallback = (message: string = 'No Logo') => (
+    <div
+      className={cn(
+        FRAME_SIZE_MAP[size],
+        'flex items-center justify-center',
+        className
+      )}
+    >
+      <div className={cn(SIZE_MAP[size], 'rounded-lg bg-muted flex flex-col items-center justify-center text-muted-foreground gap-1')}>
+        {imageError && <AlertCircle className="w-4 h-4 text-destructive" aria-hidden="true" />}
+        <span className="text-xs">{message}</span>
+      </div>
+    </div>
+  );
 
   if (type === 'none' || !path) {
-    return (
-      <div
-        className={cn(
-          FRAME_SIZE_MAP[size],
-          'flex items-center justify-center',
-          className
-        )}
-      >
-        <div className={cn(SIZE_MAP[size], 'rounded-lg bg-muted flex items-center justify-center text-muted-foreground')}>
-          <span className="text-xs">No Logo</span>
-        </div>
-      </div>
-    );
+    return renderFallback('No Logo');
+  }
+
+  if (imageError) {
+    return renderFallback('Failed to load');
   }
 
   // Determine icon background color
@@ -137,15 +166,17 @@ export function LogoPreview({ config, size = 'lg', className }: LogoPreviewProps
       />
     );
   } else if (type === 'library-icon') {
-    // Icons from game-icons.net library
+    // Icons from game-icons.net library (or full path if already specified)
+    // If path starts with '/', it's a full path (e.g., from a saved theme-icon)
+    const iconPath = path.startsWith('/') ? path : `/icons/game-icons.net/${path}.svg`;
     logoContent = (
       <div
         className={cn('w-full h-full', iconBgClass)}
         style={{
           ...iconBgStyle,
           ...cropTransform,
-          WebkitMask: `url(/icons/game-icons.net/${path}.svg) center/contain no-repeat`,
-          mask: `url(/icons/game-icons.net/${path}.svg) center/contain no-repeat`,
+          WebkitMask: `url(${iconPath}) center/contain no-repeat`,
+          mask: `url(${iconPath}) center/contain no-repeat`,
         }}
       />
     );
@@ -157,6 +188,7 @@ export function LogoPreview({ config, size = 'lg', className }: LogoPreviewProps
         alt="Guild logo"
         className="w-full h-full object-cover"
         style={cropTransform}
+        onError={() => setImageError(true)}
       />
     );
   }
@@ -469,16 +501,10 @@ function LogoFrameComponent({ frameType, shape, frameColor, children }: LogoFram
           />
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
             <defs>
-              {/* Ellipse links for circle, rectangular links for square/rounded */}
-              {effectiveShape === 'circle' ? (
-                <pattern id={`chain-${patternId}`} patternUnits="userSpaceOnUse" width="10" height="10">
-                  <ellipse cx="5" cy="5" rx="4" ry="2.5" fill="none" stroke={colorStyle || '#a1a1aa'} strokeWidth="2" />
-                </pattern>
-              ) : (
-                <pattern id={`chain-${patternId}`} patternUnits="userSpaceOnUse" width="12" height="12">
-                  <rect x="2" y="4" width="8" height="4" rx="1" fill="none" stroke={colorStyle || '#a1a1aa'} strokeWidth="1.5" />
-                </pattern>
-              )}
+              {/* Ellipse chain links for all shapes */}
+              <pattern id={`chain-${patternId}`} patternUnits="userSpaceOnUse" width="10" height="10">
+                <ellipse cx="5" cy="5" rx="4" ry="2.5" fill="none" stroke={colorStyle || '#a1a1aa'} strokeWidth="2" />
+              </pattern>
             </defs>
             {effectiveShape === 'circle' ? (
               <circle cx="50" cy="50" r="45" fill="none" stroke={`url(#chain-${patternId})`} strokeWidth="10" />
@@ -524,20 +550,9 @@ function LogoFrameComponent({ frameType, shape, frameColor, children }: LogoFram
 
     case 'thorns':
       return (
-        <div className={cn(frameClasses, 'p-2')}>
+        <div className={cn(frameClasses, 'p-1 overflow-hidden')}>
           {/* Thorny vine border */}
-          <div
-            className={cn(
-              'absolute inset-2',
-              effectiveShape === 'circle' && 'rounded-full',
-              effectiveShape === 'rounded' && 'rounded-lg',
-            )}
-            style={{
-              border: `2px solid ${colorStyle || '#9f1239'}`,
-              boxShadow: `0 0 10px ${colorStyle || '#881337'}40`,
-            }}
-          />
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
             <defs>
               <pattern id={`thorns-${patternId}`} patternUnits="userSpaceOnUse" width="14" height="14">
                 <path
@@ -551,11 +566,14 @@ function LogoFrameComponent({ frameType, shape, frameColor, children }: LogoFram
                   strokeWidth="0.5"
                 />
               </pattern>
+              <filter id={`thorns-glow-${patternId}`}>
+                <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor={colorStyle || '#881337'} floodOpacity="0.4" />
+              </filter>
             </defs>
             {effectiveShape === 'circle' ? (
-              <circle cx="50" cy="50" r="44" fill="none" stroke={`url(#thorns-${patternId})`} strokeWidth="12" />
+              <circle cx="50" cy="50" r="46" fill="none" stroke={`url(#thorns-${patternId})`} strokeWidth="8" filter={`url(#thorns-glow-${patternId})`} />
             ) : (
-              <rect x="6" y="6" width="88" height="88" rx={effectiveShape === 'rounded' ? 8 : 0} fill="none" stroke={`url(#thorns-${patternId})`} strokeWidth="12" />
+              <rect x="4" y="4" width="92" height="92" rx={effectiveShape === 'rounded' ? 12 : 0} fill="none" stroke={`url(#thorns-${patternId})`} strokeWidth="8" filter={`url(#thorns-glow-${patternId})`} />
             )}
           </svg>
           <div className="relative z-10">

@@ -14,7 +14,9 @@ interface SessionData {
  * GET /api/auth/me
  *
  * Returns the current authenticated user's information
- * Dynamically checks if user is site owner for correct permission level
+ * Dynamically checks permissions based on:
+ * 1. Site owner status (always SUPERADMIN)
+ * 2. Discord role mappings configured in settings
  */
 export async function GET(request: NextRequest) {
   try {
@@ -37,13 +39,28 @@ export async function GET(request: NextRequest) {
       return response;
     }
 
-    // Dynamically check if user is the site owner
-    // This handles the case where setup was completed after login
+    // Dynamically determine permission level
     const user = { ...sessionData.user };
     try {
       const guildConfig = await getGuildConfig();
+
+      // Check if user is site owner - always SUPERADMIN
       if (guildConfig?.discord?.ownerId === user.id) {
         user.permissionLevel = PermissionLevel.SUPERADMIN;
+      } else if (guildConfig?.discord?.roleMappings && user.roles?.length > 0) {
+        // Check role mappings - user gets highest permission from any matching role
+        let highestPermission = PermissionLevel.VIEWER;
+
+        for (const roleId of user.roles) {
+          const mapping = guildConfig.discord.roleMappings.find(
+            m => m.discordRoleId === roleId
+          );
+          if (mapping && mapping.permissionLevel > highestPermission) {
+            highestPermission = mapping.permissionLevel;
+          }
+        }
+
+        user.permissionLevel = highestPermission;
       }
     } catch {
       // If we can't fetch config, use cached permission level

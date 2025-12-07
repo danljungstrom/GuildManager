@@ -5,8 +5,8 @@
 @layer base {
   :root {
     /* Typography System */
-    /* Body font - shared across all themes */
-    --font-body: var(--font-body-fallback, 'Inter', ui-sans-serif, system-ui, sans-serif);
+    /* Body font - shared across all themes (default: Lexend) */
+    --font-body: var(--font-lexend, 'Lexend', ui-sans-serif, system-ui, sans-serif);
 
     /* Theme-specific heading fonts */
     --font-heading-spartan: var(--font-heading-spartan-fallback, 'Cinzel Decorative', serif);
@@ -15,9 +15,15 @@
     --font-heading-shadow: var(--font-heading-shadow-fallback, 'Almendra SC', serif);
     --font-heading-nature: var(--font-heading-nature-fallback, 'Uncial Antiqua', cursive);
     --font-heading-frost: var(--font-heading-frost-fallback, 'Wendy One', sans-serif);
+    --font-heading-holy: var(--font-heading-holy-fallback, 'Grenze Gotisch', cursive);
+    --font-heading-ember: var(--font-heading-ember-fallback, 'Fascinate Inline', cursive);
+    --font-heading-custom: var(--font-heading-custom-fallback, 'Tilt Prism', cursive);
 
     /* Active theme font (defaults to Spartan/Gold) */
     --font-heading: var(--font-heading-spartan);
+
+    /* Font size scaling for fonts that render smaller */
+    --font-heading-scale: 1;
 
     /* Base color system - Light Mode */
     --background: 0 0% 100%;
@@ -166,6 +172,12 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading), var(--font-body), ui-sans-serif, system-ui, sans-serif;
     font-weight: 700;
+  }
+
+  /* Apply heading font scale for fonts that render smaller (e.g., Pirata One) */
+  h1, h2, h3 {
+    transform: scale(var(--font-heading-scale, 1));
+    transform-origin: left center;
   }
   code, pre {
     font-family: var(--font-geist-mono), ui-monospace, monospace;
