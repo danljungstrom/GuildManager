@@ -393,13 +393,15 @@ function LogoFrameComponent({ frameType, shape, frameColor, children }: LogoFram
             ) : (
               <rect x="4" y="4" width="92" height="92" rx={effectiveShape === 'rounded' ? 12 : 0} fill="none" stroke={`url(#ornate-ring-${patternId})`} strokeWidth="6" />
             )}
-            {/* Corner flourishes */}
-            <g fill="none" stroke={colorStyle || '#eab308'} strokeWidth="1.5" opacity="0.8">
-              <path d="M20,8 Q14,14 8,20" />
-              <path d="M80,8 Q86,14 92,20" />
-              <path d="M20,92 Q14,86 8,80" />
-              <path d="M80,92 Q86,86 92,80" />
-            </g>
+            {/* Corner flourishes - only for circle shape */}
+            {effectiveShape === 'circle' && (
+              <g fill="none" stroke={colorStyle || '#eab308'} strokeWidth="1.5" opacity="0.8">
+                <path d="M20,8 Q14,14 8,20" />
+                <path d="M80,8 Q86,14 92,20" />
+                <path d="M20,92 Q14,86 8,80" />
+                <path d="M80,92 Q86,86 92,80" />
+              </g>
+            )}
           </svg>
           <div className="relative z-10">
             {children}
@@ -467,9 +469,16 @@ function LogoFrameComponent({ frameType, shape, frameColor, children }: LogoFram
           />
           <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
             <defs>
-              <pattern id={`chain-${patternId}`} patternUnits="userSpaceOnUse" width="10" height="10">
-                <ellipse cx="5" cy="5" rx="4" ry="2.5" fill="none" stroke={colorStyle || '#a1a1aa'} strokeWidth="2" />
-              </pattern>
+              {/* Ellipse links for circle, rectangular links for square/rounded */}
+              {effectiveShape === 'circle' ? (
+                <pattern id={`chain-${patternId}`} patternUnits="userSpaceOnUse" width="10" height="10">
+                  <ellipse cx="5" cy="5" rx="4" ry="2.5" fill="none" stroke={colorStyle || '#a1a1aa'} strokeWidth="2" />
+                </pattern>
+              ) : (
+                <pattern id={`chain-${patternId}`} patternUnits="userSpaceOnUse" width="12" height="12">
+                  <rect x="2" y="4" width="8" height="4" rx="1" fill="none" stroke={colorStyle || '#a1a1aa'} strokeWidth="1.5" />
+                </pattern>
+              )}
             </defs>
             {effectiveShape === 'circle' ? (
               <circle cx="50" cy="50" r="45" fill="none" stroke={`url(#chain-${patternId})`} strokeWidth="10" />
@@ -588,13 +597,15 @@ function LogoFrameComponent({ frameType, shape, frameColor, children }: LogoFram
                 <rect x="4" y="4" width="92" height="92" rx={effectiveShape === 'rounded' ? 12 : 0} fill="none" stroke={`url(#dragon-scales-ring-${patternId})`} strokeWidth="6" />
               </>
             )}
-            {/* Corner dragon motifs */}
-            <g fill={colorStyle ? 'rgba(255,255,255,0.6)' : '#fca5a5'}>
-              <path d="M15,10 Q20,15 15,20 Q10,15 15,10" />
-              <path d="M85,10 Q90,15 85,20 Q80,15 85,10" />
-              <path d="M15,80 Q20,85 15,90 Q10,85 15,80" />
-              <path d="M85,80 Q90,85 85,90 Q80,85 85,80" />
-            </g>
+            {/* Corner dragon motifs - only for circle shape */}
+            {effectiveShape === 'circle' && (
+              <g fill={colorStyle ? 'rgba(255,255,255,0.6)' : '#fca5a5'}>
+                <path d="M15,10 Q20,15 15,20 Q10,15 15,10" />
+                <path d="M85,10 Q90,15 85,20 Q80,15 85,10" />
+                <path d="M15,80 Q20,85 15,90 Q10,85 15,80" />
+                <path d="M85,80 Q90,85 85,90 Q80,85 85,80" />
+              </g>
+            )}
           </svg>
           <div className="relative z-10">
             {children}

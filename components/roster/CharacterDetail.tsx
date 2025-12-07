@@ -71,16 +71,6 @@ export function CharacterDetail() {
               <p className="text-sm text-muted-foreground mb-1">Class</p>
               <ClassIcon className={member.class} variant="text" showText />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Level</p>
-              <p className="text-base font-semibold">{member.level || 'Unknown'}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Gear Score</p>
-              <p className="text-base font-semibold">
-                {member.gearInfo?.gearScore || 'N/A'}
-              </p>
-            </div>
           </div>
 
           <Separator />

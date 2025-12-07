@@ -109,7 +109,7 @@ export const PERMISSION_LABELS: Record<PermissionLevel, string> = {
   [PermissionLevel.MEMBER]: 'Member',
   [PermissionLevel.MODERATOR]: 'Moderator',
   [PermissionLevel.ADMIN]: 'Admin',
-  [PermissionLevel.SUPERADMIN]: 'Super Admin',
+  [PermissionLevel.SUPERADMIN]: 'Owner',
 };
 
 /**
@@ -120,7 +120,7 @@ export const PERMISSION_DESCRIPTIONS: Record<PermissionLevel, string> = {
   [PermissionLevel.MEMBER]: 'Can sign up for raids and view full roster',
   [PermissionLevel.MODERATOR]: 'Can manage class members and raid signups',
   [PermissionLevel.ADMIN]: 'Can manage raids, roster, and most settings',
-  [PermissionLevel.SUPERADMIN]: 'Full control including admin management',
+  [PermissionLevel.SUPERADMIN]: 'Site owner with full control',
 };
 
 /**

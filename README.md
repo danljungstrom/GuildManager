@@ -27,6 +27,13 @@ A fully customizable guild management system for World of Warcraft guilds, built
    - Create account if not registered
    - Click **"Create a project"** → Enter name → Disable Analytics → Create
    - Enable Firestore: **Build** → **Firestore Database** → **Create database** → Standard → Choose region → Production mode → Enable
+   - Create Firestore Index (required for character requests):
+     - Go to **Firestore Database** → **Indexes** tab
+     - Click **Create Index**
+     - Collection ID: `character-requests`
+     - Fields: `requesterId` (Ascending), `createdAt` (Descending)
+     - Query scope: Collection
+     - Click **Create** (takes 1-2 minutes to build)
    - Create Web App: **Project Overview** (⚙️) → **Add app** → **Web** (`</>`) → Register app (nickname: "*Guildname*", no hosting)
    - **Either copy the entire code block or keep the page open**:
    

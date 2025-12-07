@@ -39,10 +39,15 @@ export async function getAllRosterMembers(): Promise<RosterMember[]> {
     const rosterRef = collection(db, ROSTER_COLLECTION);
     const snapshot = await getDocs(rosterRef);
 
-    const members: RosterMember[] = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as RosterMember[];
+    const members: RosterMember[] = snapshot.docs.map((document) => {
+      const data = document.data();
+      // Ensure Firestore doc ID takes precedence over any stored 'id' field
+      const { id: _storedId, ...restData } = data;
+      return {
+        ...restData,
+        id: document.id,
+      };
+    }) as RosterMember[];
 
     return members;
   } catch (error) {
@@ -71,9 +76,12 @@ export async function getRosterMemberById(
       return null;
     }
 
+    const data = snapshot.data();
+    // Ensure Firestore doc ID takes precedence over any stored 'id' field
+    const { id: _storedId, ...restData } = data;
     return {
+      ...restData,
       id: snapshot.id,
-      ...snapshot.data(),
     } as RosterMember;
   } catch (error) {
     console.error('Error fetching roster member:', error);
@@ -97,10 +105,15 @@ export async function getRosterMembersByClass(
     const q = query(rosterRef, where('class', '==', className));
     const snapshot = await getDocs(q);
 
-    const members: RosterMember[] = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as RosterMember[];
+    const members: RosterMember[] = snapshot.docs.map((document) => {
+      const data = document.data();
+      // Ensure Firestore doc ID takes precedence over any stored 'id' field
+      const { id: _storedId, ...restData } = data;
+      return {
+        ...restData,
+        id: document.id,
+      };
+    }) as RosterMember[];
 
     return members;
   } catch (error) {
@@ -125,10 +138,15 @@ export async function getRosterMembersByRank(
     const q = query(rosterRef, where('rank', '==', rank));
     const snapshot = await getDocs(q);
 
-    const members: RosterMember[] = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as RosterMember[];
+    const members: RosterMember[] = snapshot.docs.map((document) => {
+      const data = document.data();
+      // Ensure Firestore doc ID takes precedence over any stored 'id' field
+      const { id: _storedId, ...restData } = data;
+      return {
+        ...restData,
+        id: document.id,
+      };
+    }) as RosterMember[];
 
     return members;
   } catch (error) {
@@ -312,13 +330,6 @@ export async function getRosterStatistics() {
       return acc;
     }, {} as Record<string, number>);
 
-    // Average level
-    const levels = members.filter((m) => m.level).map((m) => m.level!);
-    const avgLevel =
-      levels.length > 0
-        ? Math.round(levels.reduce((sum, level) => sum + level, 0) / levels.length)
-        : 0;
-
     // Average attendance
     const attendancePercentages = members
       .filter((m) => m.attendance?.percentage !== undefined)
@@ -338,7 +349,6 @@ export async function getRosterStatistics() {
       trials,
       classCounts,
       roleCounts,
-      avgLevel,
       avgAttendance,
     };
   } catch (error) {
@@ -368,8 +378,10 @@ export async function populateRosterWithMockData(
     let count = 0;
 
     for (let i = 0; i < members.length; i++) {
+      // Destructure to exclude any existing 'id' field from the data
+      const { id: _ignoredId, ...memberWithoutId } = members[i] as RosterMember;
       const memberData = {
-        ...members[i],
+        ...memberWithoutId,
         createdAt: now,
         updatedAt: now,
       };

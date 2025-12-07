@@ -20,10 +20,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     spec: 'Protection',
     offSpec: 'Arms',
     role: 'Tank',
-    level: 60,
-    gearInfo: {
-      gearScore: 485,
-    },
     attunements: {
       mc: true,
       onyxia: true,
@@ -57,10 +53,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     spec: 'Holy',
     offSpec: 'Discipline',
     role: 'Healer',
-    level: 60,
-    gearInfo: {
-      gearScore: 470,
-    },
     attunements: {
       mc: true,
       onyxia: true,
@@ -92,10 +84,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     class: 'Mage',
     spec: 'Fire',
     role: 'DPS',
-    level: 60,
-    gearInfo: {
-      gearScore: 455,
-    },
     attunements: {
       mc: true,
       onyxia: true,
@@ -127,10 +115,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     spec: 'Feral',
     offSpec: 'Restoration',
     role: 'Tank',
-    level: 60,
-    gearInfo: {
-      gearScore: 465,
-    },
     attunements: {
       mc: true,
       onyxia: true,
@@ -163,10 +147,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     spec: 'Combat',
     offSpec: 'Assassination',
     role: 'DPS',
-    level: 60,
-    gearInfo: {
-      gearScore: 478,
-    },
     attunements: {
       mc: true,
       onyxia: true,
@@ -197,10 +177,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     class: 'Paladin',
     spec: 'Holy',
     role: 'Healer',
-    level: 60,
-    gearInfo: {
-      gearScore: 450,
-    },
     attunements: {
       mc: true,
       onyxia: true,
@@ -230,10 +206,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     class: 'Hunter',
     spec: 'Beast Mastery',
     role: 'DPS',
-    level: 60,
-    gearInfo: {
-      gearScore: 460,
-    },
     attunements: {
       mc: true,
       onyxia: true,
@@ -263,10 +235,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     class: 'Warlock',
     spec: 'Affliction',
     role: 'DPS',
-    level: 60,
-    gearInfo: {
-      gearScore: 472,
-    },
     attunements: {
       mc: true,
       onyxia: true,
@@ -298,10 +266,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     spec: 'Restoration',
     offSpec: 'Enhancement',
     role: 'Healer',
-    level: 60,
-    gearInfo: {
-      gearScore: 448,
-    },
     attunements: {
       mc: true,
       onyxia: true,
@@ -331,10 +295,6 @@ export const MOCK_ROSTER_MEMBERS: RosterMember[] = [
     class: 'Mage',
     spec: 'Frost',
     role: 'DPS',
-    level: 60,
-    gearInfo: {
-      gearScore: 425,
-    },
     attunements: {
       mc: true,
       onyxia: true,

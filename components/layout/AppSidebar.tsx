@@ -65,7 +65,7 @@ export function AppSidebar() {
               className="h-8 w-8"
               title="Settings"
             >
-              <Link href="/admin/settings">
+              <Link href="/settings">
                 <Settings className="h-4 w-4" />
               </Link>
             </Button>
@@ -83,7 +83,7 @@ export function AppSidebar() {
                 className="h-8 w-8"
                 title="Settings"
               >
-                <Link href="/admin/settings">
+                <Link href="/settings">
                   <Settings className="h-4 w-4" />
                 </Link>
               </Button>

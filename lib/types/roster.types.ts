@@ -59,24 +59,16 @@ export const CLASSIC_ATTUNEMENTS: Attunement[] = [
 ];
 
 /**
- * Gear information
- */
-export interface GearInfo {
-  gearScore?: number; // Overall gear score
-  mainHandIlvl?: number;
-  offHandIlvl?: number;
-  headIlvl?: number;
-  chestIlvl?: number;
-  legsIlvl?: number;
-}
-
-/**
  * Complete guild member roster entry
  */
 export interface RosterMember {
   // Identity
   id?: string; // Firestore document ID
   name: string; // Character name
+
+  // Character ownership (Discord integration)
+  claimedBy?: string; // Discord user ID who claimed this character
+  claimDate?: string; // ISO date when character was claimed
 
   // Core attributes
   rank: GuildRank;
@@ -86,11 +78,9 @@ export interface RosterMember {
   role?: RoleType; // Primary raid role
 
   // Character details
-  level?: number; // Character level (1-60 for Classic)
   race?: string; // Character race (not critical for initial implementation)
 
-  // Gear and progression
-  gearInfo?: GearInfo;
+  // Progression
   attunements: AttunementMap;
   professions: ProfessionEntry[];
 
@@ -142,8 +132,6 @@ export type RosterSortField =
   | 'name'
   | 'rank'
   | 'class'
-  | 'level'
-  | 'gearScore'
   | 'attendance'
   | 'joinDate';
 
@@ -272,12 +260,6 @@ export function sortRosterMembers(
         break;
       case 'class':
         comparison = a.class.localeCompare(b.class);
-        break;
-      case 'level':
-        comparison = (a.level || 0) - (b.level || 0);
-        break;
-      case 'gearScore':
-        comparison = (a.gearInfo?.gearScore || 0) - (b.gearInfo?.gearScore || 0);
         break;
       case 'attendance':
         comparison =
