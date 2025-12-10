@@ -3,6 +3,8 @@
  *
  * Zustand store for managing roster state, including members list,
  * filtering, sorting, search, and admin edit mode.
+ *
+ * Includes client-side TTL caching to prevent excessive Firestore reads.
  */
 
 import { create } from 'zustand';
@@ -21,10 +23,19 @@ import type { ClassType } from '@/lib/types/classes.types';
 import type { RoleType } from '@/lib/types/roles.types';
 import type { GuildRank } from '@/lib/types/roster.types';
 
+// Cache TTL: how long before data is considered stale
+// Longer in dev to reduce Firestore reads during development
+const CACHE_TTL_MS = process.env.NODE_ENV === 'development'
+  ? 5 * 60 * 1000  // 5 minutes in dev
+  : 30 * 1000;     // 30 seconds in prod
+
 interface RosterState {
   // Data
   members: RosterMember[];
   filteredMembers: RosterMember[];
+
+  // Cache tracking
+  lastFetchedAt: number | null;
 
   // UI State
   isLoading: boolean;
@@ -41,6 +52,11 @@ interface RosterState {
   addMember: (member: RosterMember) => void;
   updateMember: (id: string, updates: Partial<RosterMember>) => void;
   removeMember: (id: string) => void;
+
+  // Actions - Cache Management
+  markAsFetched: () => void;
+  invalidateCache: () => void;
+  isCacheValid: () => boolean;
 
   // Actions - UI State
   setLoading: (isLoading: boolean) => void;
@@ -80,6 +96,7 @@ export const useRosterStore = create<RosterState>((set, get) => ({
   // Initial state
   members: [],
   filteredMembers: [],
+  lastFetchedAt: null,
   isLoading: false,
   error: null,
   isEditMode: false,
@@ -98,6 +115,7 @@ export const useRosterStore = create<RosterState>((set, get) => ({
       members: [...state.members, member],
     }));
     get()._recomputeFilteredMembers();
+    get().invalidateCache(); // Invalidate cache on mutations
   },
 
   updateMember: (id, updates) => {
@@ -107,6 +125,7 @@ export const useRosterStore = create<RosterState>((set, get) => ({
       ),
     }));
     get()._recomputeFilteredMembers();
+    // Don't invalidate cache for local updates - data is already fresh
   },
 
   removeMember: (id) => {
@@ -115,6 +134,22 @@ export const useRosterStore = create<RosterState>((set, get) => ({
       selectedMemberId: state.selectedMemberId === id ? null : state.selectedMemberId,
     }));
     get()._recomputeFilteredMembers();
+    get().invalidateCache(); // Invalidate cache on mutations
+  },
+
+  // Cache Management Actions
+  markAsFetched: () => {
+    set({ lastFetchedAt: Date.now() });
+  },
+
+  invalidateCache: () => {
+    set({ lastFetchedAt: null });
+  },
+
+  isCacheValid: () => {
+    const { lastFetchedAt, members } = get();
+    if (!lastFetchedAt || members.length === 0) return false;
+    return Date.now() - lastFetchedAt < CACHE_TTL_MS;
   },
 
   // UI State Actions

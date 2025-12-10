@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -206,6 +206,7 @@ export default function UserSettingsPage() {
         // Apply logo if saved
         if (matchedTheme.logoConfig) {
           setLogoConfig(matchedTheme.logoConfig);
+          setLogoConfigInitialized(true); // Prevent logo sync effect from overwriting
         }
 
         setCustomColorsInitialized(true);
@@ -298,6 +299,9 @@ export default function UserSettingsPage() {
   // Track if logoConfig has been initialized to avoid overwriting local changes
   const [logoConfigInitialized, setLogoConfigInitialized] = useState(false);
 
+  // Ref to track previous logoConfig to prevent infinite save loops
+  const prevLogoConfigHashRef = useRef<string | null>(null);
+
   // Handle logo changes - marks theme as modified
   const handleLogoChange = useCallback((newConfig: LogoConfig) => {
     setLogoConfig(newConfig);
@@ -340,10 +344,24 @@ export default function UserSettingsPage() {
 
   // Auto-save logo config when it changes (after initialization)
   // Skip when editing a saved custom theme - those changes are saved via the Save button
+  // IMPORTANT: Uses ref to prevent infinite loop - only saves when logoConfig actually changes
   useEffect(() => {
     if (!logoConfigInitialized || !config) return;
     // Don't auto-save when editing a saved custom theme
     if (activeCustomThemeId) return;
+
+    // Create a hash of the current logoConfig to detect actual changes
+    // Exclude history from hash since it shouldn't trigger saves
+    const { history: _history, ...logoConfigWithoutHistory } = logoConfig;
+    const currentHash = JSON.stringify(logoConfigWithoutHistory);
+
+    // Skip if logoConfig hasn't actually changed (prevents infinite loop)
+    if (prevLogoConfigHashRef.current === currentHash) {
+      return;
+    }
+
+    // Update the ref before saving
+    prevLogoConfigHashRef.current = currentHash;
 
     const saveLogoConfig = async () => {
       try {
@@ -545,31 +563,38 @@ export default function UserSettingsPage() {
     // This ensures switching presets gives the expected theme icon
     if (config) {
       try {
+        // Build the new logoConfig with cleared colors FIRST
+        const newLogoConfig: LogoConfig = {
+          type: 'theme-icon',
+          path: preset.id,
+          shape: logoConfig.shape || 'none',
+          frame: logoConfig.frame || 'none',
+          glow: logoConfig.glow || 'none',
+          // Clear frozen colors so they follow the new theme's primary color
+          // iconColor undefined = theme mode
+          // frameColor undefined = default mode (frame's natural color)
+          // glowColor undefined = auto mode (follows frame/theme)
+          history: logoConfig.history,
+        };
+
+        // Save with the new logoConfig included
         await updateGuildConfig({
           theme: {
             ...config.theme,
             preset: preset.id,
             logo: preset.id,
             logoType: 'theme-icon',
+            logoConfig: newLogoConfig,
           },
         });
-        // Reset local logoConfig state to theme-icon with no custom colors
-        setLogoConfig(prev => ({
-          type: 'theme-icon',
-          path: preset.id,
-          shape: prev.shape || 'none',
-          frame: prev.frame || 'none',
-          // Clear frozen colors so they follow the new theme
-          iconColor: undefined,
-          frameColor: prev.frameColor,
-          glow: prev.glow || 'none',
-          glowColor: prev.glowColor,
-        }));
+
+        // Update local state to match
+        setLogoConfig(newLogoConfig);
       } catch (error) {
         console.error('Failed to update guild logo:', error);
       }
     }
-  }, [applyPreset, config, isDark]);
+  }, [applyPreset, config, isDark, logoConfig.shape, logoConfig.frame, logoConfig.glow, logoConfig.history]);
 
   // Handle changing a custom color (marks theme as modified)
   const handleCustomColorChange = (colorKey: keyof typeof customColors, hexValue: string) => {
@@ -1346,6 +1371,17 @@ export default function UserSettingsPage() {
                             document.documentElement.style.setProperty('--font-heading', 'var(--font-heading-custom)');
                             document.documentElement.style.setProperty('--font-body', 'var(--font-lexend)');
                             document.documentElement.style.setProperty('--font-heading-scale', '1');
+                            // Reset logo to Bland theme icon with colors following new theme
+                            setLogoConfig(prev => ({
+                              type: 'theme-icon',
+                              path: 'custom',
+                              shape: prev.shape || 'none',
+                              frame: prev.frame || 'none',
+                              glow: prev.glow || 'none',
+                              iconColor: undefined,
+                              frameColor: undefined,
+                              glowColor: undefined,
+                            }));
                           }}
                           className={cn(
                             'relative flex items-center gap-3 p-3 rounded-lg border text-left transition-all hover:bg-muted/50',
@@ -1417,13 +1453,15 @@ export default function UserSettingsPage() {
                                   if (theme.logoConfig) {
                                     setLogoConfig(theme.logoConfig);
                                   }
-                                  // Persist the selection to config
+                                  // Persist the selection to config, including the logoConfig
                                   if (config) {
                                     try {
                                       await updateGuildConfig({
                                         theme: {
                                           ...config.theme,
                                           preset: theme.id, // Save the custom theme ID
+                                          // Include the logoConfig from the custom theme
+                                          logoConfig: theme.logoConfig || config.theme.logoConfig,
                                         },
                                       });
                                     } catch (err) {
@@ -1506,18 +1544,9 @@ export default function UserSettingsPage() {
                                   }
                                 }
 
-                                // Freeze theme colors to actual values for saved custom themes
-                                if (resolvedLogoConfig.type !== 'none' && resolvedLogoConfig.type !== 'custom-image') {
-                                  if (!resolvedLogoConfig.iconColor || resolvedLogoConfig.iconColor === '__theme__') {
-                                    resolvedLogoConfig.iconColor = customColors.primary;
-                                  }
-                                  if (resolvedLogoConfig.frameColor === '__theme__' || (resolvedLogoConfig.frame && resolvedLogoConfig.frame !== 'none' && !resolvedLogoConfig.frameColor)) {
-                                    resolvedLogoConfig.frameColor = customColors.primary;
-                                  }
-                                  if (resolvedLogoConfig.glowColor === '__theme__' || (resolvedLogoConfig.glow && resolvedLogoConfig.glow !== 'none' && !resolvedLogoConfig.glowColor)) {
-                                    resolvedLogoConfig.glowColor = customColors.primary;
-                                  }
-                                }
+                                // Preserve theme-following colors (undefined means follow theme)
+                                // Only freeze colors that were explicitly set to a specific value
+                                // Colors set to '__theme__' or undefined will dynamically follow the primary color
 
                                 const updatedTheme = {
                                   ...existingTheme,
@@ -2150,21 +2179,9 @@ export default function UserSettingsPage() {
                     };
                   }
                 }
-                // Freeze colors to current primary if using theme color (undefined or THEME_COLOR_MARKER)
-                if (resolvedLogoConfig.type !== 'none' && resolvedLogoConfig.type !== 'custom-image') {
-                  // Freeze icon color
-                  if (!resolvedLogoConfig.iconColor) {
-                    resolvedLogoConfig.iconColor = customColors.primary;
-                  }
-                  // Freeze frame color if using theme color
-                  if (resolvedLogoConfig.frameColor === '__theme__' || (resolvedLogoConfig.frame && resolvedLogoConfig.frame !== 'none' && !resolvedLogoConfig.frameColor)) {
-                    resolvedLogoConfig.frameColor = customColors.primary;
-                  }
-                  // Freeze glow color if using theme color
-                  if (resolvedLogoConfig.glowColor === '__theme__' || (resolvedLogoConfig.glow && resolvedLogoConfig.glow !== 'none' && !resolvedLogoConfig.glowColor)) {
-                    resolvedLogoConfig.glowColor = customColors.primary;
-                  }
-                }
+                // Preserve theme-following colors (undefined means follow theme)
+                // Only freeze colors that were explicitly set to a specific value
+                // Colors set to '__theme__' or undefined will dynamically follow the primary color
 
                 const newTheme: SavedCustomTheme = {
                   id: `custom-${Date.now()}`,

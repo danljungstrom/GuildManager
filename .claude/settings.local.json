@@ -22,7 +22,15 @@
       "mcp__playwright__*",
       "Bash(cat:*)",
       "WebFetch(domain:game-icons.net)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__serena__check_onboarding_performed",
+      "mcp__serena__activate_project",
+      "mcp__serena__list_dir",
+      "mcp__serena__onboarding",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__write_memory",
+      "mcp__serena__think_about_whether_you_are_done",
+      "mcp__serena__list_memories"
     ],
     "deny": [],
     "ask": []
